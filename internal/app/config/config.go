@@ -155,6 +155,7 @@ type HTTP struct {
 	MaxContentLength   int64
 	MaxReqLoggerLength int `default:"1024"`
 	MaxResLoggerLength int
+	SessionExpire      int `default:"1800"`
 }
 
 type Monitor struct {

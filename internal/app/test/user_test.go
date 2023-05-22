@@ -1,6 +1,9 @@
 package test
 
 import (
+	"key-go/internal/app/schema"
+	"key-go/pkg/util/hash"
+	"key-go/pkg/util/uuid"
 	"net/http/httptest"
 	"testing"
 

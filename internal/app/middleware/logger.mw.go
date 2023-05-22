@@ -4,10 +4,7 @@ import (
 	"fmt"
 	"key-go/internal/app/config"
 	"key-go/internal/app/ginx"
-	"key-go/pkg/constant"
 	"key-go/pkg/logger"
-	"key-go/pkg/logger/audit"
-	"key-go/pkg/logger/syslog"
 	"mime"
 	"net/http"
 	"time"
@@ -61,9 +58,6 @@ func LoggerMiddleware(skippers ...SkipperFunc) gin.HandlerFunc {
 		ctx := c.Request.Context()
 		entry := logger.WithContext(logger.NewTagContext(ctx, "__request__"))
 		entry.WithFields(fields).Infof("[http] %s-%s-%s-%d(%dms)", p, c.Request.Method, c.ClientIP(), c.Writer.Status(), timeConsuming)
-		err := audit.WriteAuditLog(fmt.Sprintf("%s-%s-%s-%d(%dms)", p, c.Request.Method, c.ClientIP(), c.Writer.Status(), timeConsuming))
-		if err != nil {
-			syslog.SendSyslog(constant.LogLevelError, fmt.Sprintf("%s-%s-%s-%d(%dms)", p, c.Request.Method, c.ClientIP(), c.Writer.Status(), timeConsuming))
-		}
+		logger.WriteAuditLog(fmt.Sprintf("%s-%s-%s-%d(%dms)", p, c.Request.Method, c.ClientIP(), c.Writer.Status(), timeConsuming))
 	}
 }

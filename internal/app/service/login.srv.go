@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"key-go/internal/app/dao"
+	"key-go/internal/app/dao/sysxml"
 	"key-go/internal/app/schema"
 	"key-go/pkg/auth"
 	"key-go/pkg/errors"
-	"key-go/pkg/logger/audit"
+	"key-go/pkg/logger"
 	"key-go/pkg/util/hash"
 
 	"golang.org/x/crypto/bcrypt"
@@ -80,15 +81,15 @@ func (a *LoginSrv) ResCaptcha(ctx context.Context, w http.ResponseWriter, captch
 //}
 
 // VerifyByConfig TODO ----
-func (a *LoginSrv) VerifyByConfig(userName, password string) (*schema.UserConfigXml, error) {
-	ok, user := schema.GetUserFromConfig(userName)
+func (a *LoginSrv) VerifyByConfig(userName, password string) (*sysxml.UserConfigXml, error) {
+	ok, user := schema.GetUserByUsername(userName)
 	if !ok {
 		return nil, errors.New400Response("not found user_name")
 	}
 	// 根据用户名获取到的user信息与输入密码 password 对比校验
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		// 密码错误
-		audit.WriteAuditLog(fmt.Sprintf("用户[%s]登录失败，密码错误", userName))
+		logger.WriteAuditLog(fmt.Sprintf("用户[%s]登录失败，密码错误", userName))
 		return nil, errors.New400Response("password incorrect")
 	}
 	return user, nil

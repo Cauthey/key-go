@@ -4,7 +4,7 @@ NOW = $(shell date -u '+%Y%m%d%I%M%S')
 
 RELEASE_VERSION = v8.1.0
 
-APP 		= firewall
+APP 		= key-go
 SERVER_BIN  	= ./cmd/${APP}/${APP}
 RELEASE_ROOT 	= release
 RELEASE_SERVER 	= release/${APP}

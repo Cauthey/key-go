@@ -40,19 +40,16 @@ go get -u github.com/swaggo/swag/cmd/swag
 ```bash
 $ git clone 
 
-$ cd gin-admin
+$ cd key-go
 
-# 使用AIR工具运行
-$ air
-
-# OR 基于Makefile运行
+# 基于Makefile运行
 $ make start
 
 # OR 使用go命令运行
 $ go run cmd/key-go/main.go web -c ./configs/config.toml -m ./configs/model.conf --menu ./configs/menu.yaml
 ```
 
-> 启动成功之后，可在浏览器中输入地址进行访问：[http://127.0.0.1:10088/swagger/index.html](http://127.0.0.1:10088/swagger/index.html)
+> 启动成功之后，可在浏览器中输入地址进行访问：[http://127.0.0.1:10088](http://127.0.0.1:10088)
 
 ## 生成`swagger`文档
 
@@ -73,16 +70,6 @@ make wire
 # OR 使用wire命令
 wire gen ./internal/app
 ```
-
-## [gin-admin-cli](https://github.com/gin-admin/gin-admin-cli) 工具使用
-
-### 创建项目
-
-```bash
-gin-admin-cli new -d test-key-go -p test-key-go -m
-```
-
-### 快速生成业务模块
 
 #### 创建模板 task.yaml
 
@@ -148,6 +135,7 @@ export CGO_ENABLED=1; export CC=gcc; go get -v -x github.com/mattn/go-sqlite3
 │   ├── config.toml       # 配置文件
 │   ├── menu.yaml         # 菜单初始化配置
 │   └── model.conf        # casbin 策略配置
+│   └── config.xml        # 系统全局配置文件
 ├── docs                  # 文档
 ├── internal
 │   └── app

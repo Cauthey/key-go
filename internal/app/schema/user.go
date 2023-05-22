@@ -2,15 +2,12 @@ package schema
 
 import (
 	"context"
-	"encoding/xml"
-	"fmt"
 	"key-go/internal/app/config"
-	"key-go/pkg/constant"
+	"key-go/internal/app/dao/sysxml"
 	"key-go/pkg/util/hash"
 	"key-go/pkg/util/json"
 	"key-go/pkg/util/structure"
 
-	"os"
 	"time"
 )
 
@@ -192,58 +189,15 @@ type UserShowQueryResult struct {
 
 // ------------------------------新添加读取xml文件的函数验证用户--------------------------------
 
-func GetUserFromConfig(username string) (bool, *UserConfigXml) {
-	// 读取/conf/config.xml 中的所有用户信息
-	file, err := os.Open(constant.SystemConfigXmlPath)
+func GetUserByUsername(username string) (bool, *sysxml.UserConfigXml) {
+	taf, err := sysxml.Get()
 	if err != nil {
-		fmt.Println("无法打开XML文件:", err)
+		return false, nil
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			return
-		}
-	}(file)
-	var opnsense OPNSense
-	decoder := xml.NewDecoder(file)
-	err = decoder.Decode(&opnsense)
-	if err != nil {
-		fmt.Println("解析XML文件时出错:", err)
-	}
-	fmt.Println("opnsense:", opnsense)
-	for _, user := range opnsense.System.User {
-		fmt.Println(user)
-		if user.Name == username {
-			return true, &user
+	for _, v := range taf.System.User {
+		if v.Name == username {
+			return true, &v
 		}
 	}
-	return false, &UserConfigXml{}
-}
-
-type OPNSense struct {
-	XMLName xml.Name `xml:"opnsense"`
-	System  System   `xml:"system"`
-}
-
-type System struct {
-	XMLName   xml.Name        `xml:"system"`
-	User      []UserConfigXml `xml:"user"`
-	UserGroup []UserGroups    `xml:"group"`
-}
-
-type UserConfigXml struct {
-	Name        string `xml:"name"`
-	Description string `xml:"descr"`
-	GroupName   string `xml:"groupname"`
-	Password    string `xml:"password"`
-	UID         int    `xml:"uid"`
-}
-
-type UserGroups struct {
-	Name        string `xml:"name"`
-	Description string `xml:"description"`
-	Scope       string `xml:"scope"`
-	GID         int    `xml:"gid"`
-	Member      int    `xml:"member"`
-	Priv        string `xml:"priv"`
+	return false, nil
 }

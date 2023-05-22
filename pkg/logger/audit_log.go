@@ -1,4 +1,4 @@
-package audit
+package logger
 
 import (
 	"key-go/pkg/constant"
@@ -8,16 +8,16 @@ import (
 	"time"
 )
 
-func WriteAuditLog(info string) (err error) {
+func WriteAuditLog(info string) {
 	logName := "audit_" + time.Now().Format("20060102") + ".log"
 	logPath := path.Join(constant.AuditLogPath, logName)
 	index := strings.Index(info, "\n")
 	if index == -1 || index == len(info)-1 {
 		info += "\n"
 	}
-	err = files.WriteFileByAddContent(logPath, info)
+	err := files.WriteFileByAddContent(logPath, info)
 	if err != nil {
-		return err
+		panic(err)
 	}
-	return nil
+	return
 }
