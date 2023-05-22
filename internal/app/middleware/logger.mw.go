@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"key-go/internal/app/config"
 	"key-go/internal/app/ginx"
 	"key-go/pkg/logger"
@@ -33,7 +32,7 @@ func LoggerMiddleware(skippers ...SkipperFunc) gin.HandlerFunc {
 		fields["user_agent"] = c.GetHeader("User-Agent")
 		fields["content_length"] = c.Request.ContentLength
 
-		if method == http.MethodPost || method == http.MethodPut {
+		if method == http.MethodPost || method == http.MethodPut || method == http.MethodDelete {
 			mediaType, _, _ := mime.ParseMediaType(c.GetHeader("Content-Type"))
 			if mediaType != "multipart/form-data" {
 				if v, ok := c.Get(ginx.ReqBodyKey); ok {
@@ -58,6 +57,5 @@ func LoggerMiddleware(skippers ...SkipperFunc) gin.HandlerFunc {
 		ctx := c.Request.Context()
 		entry := logger.WithContext(logger.NewTagContext(ctx, "__request__"))
 		entry.WithFields(fields).Infof("[http] %s-%s-%s-%d(%dms)", p, c.Request.Method, c.ClientIP(), c.Writer.Status(), timeConsuming)
-		logger.WriteAuditLog(fmt.Sprintf("%s-%s-%s-%d(%dms)", p, c.Request.Method, c.ClientIP(), c.Writer.Status(), timeConsuming))
 	}
 }

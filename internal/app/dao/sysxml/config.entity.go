@@ -59,7 +59,7 @@ type UserConfigXml struct {
 	Description string   `xml:"descr"`
 	GroupName   string   `xml:"groupname"`
 	Password    string   `xml:"password"`
-	UID         int      `xml:"uid"`
+	UID         uint64   `xml:"uid"`
 }
 
 type UserGroups struct {

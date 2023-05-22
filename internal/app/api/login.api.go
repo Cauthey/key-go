@@ -2,16 +2,15 @@ package api
 
 import (
 	"fmt"
+	"github.com/LyricTian/captcha"
+	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 	"key-go/internal/app/contextx"
 	"key-go/internal/app/ginx"
 	"key-go/internal/app/schema"
 	"key-go/internal/app/service"
 	"key-go/pkg/errors"
 	"key-go/pkg/logger"
-
-	"github.com/LyricTian/captcha"
-	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 
 	"key-go/internal/app/config"
 )
@@ -67,7 +66,7 @@ func (a *LoginAPI) Login(c *gin.Context) {
 	//	return
 	//}
 
-	user, err := a.LoginSrv.VerifyByConfig(item.UserName, item.Password)
+	user, err := a.LoginSrv.Verify(item.UserName, item.Password)
 	if err != nil {
 		ginx.ResError(c, err)
 		return

@@ -20,7 +20,7 @@ var VERSION = "8.1.0"
 // @in header
 // @name Authorization
 // @schemes http https
-// @basePath /
+// @basePath
 // @contact.name LyricTian
 // @contact.email tiannianshou@gmail.com
 func main() {

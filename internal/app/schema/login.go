@@ -7,11 +7,18 @@ type LoginParam struct {
 	CaptchaCode string `json:"captcha_code" binding:""`      // 验证码
 }
 
+//type UserLoginInfo struct {
+//	UserID   uint64 `json:"user_id,string"` // 用户ID
+//	UserName string `json:"user_name"`      // 用户名
+//	RealName string `json:"real_name"`      // 真实姓名
+//	Roles    Roles  `json:"roles"`          // 角色列表
+//}
+
 type UserLoginInfo struct {
-	UserID   uint64 `json:"user_id,string"` // 用户ID
-	UserName string `json:"user_name"`      // 用户名
-	RealName string `json:"real_name"`      // 真实姓名
-	Roles    Roles  `json:"roles"`          // 角色列表
+	UserID      uint64 `json:"user_id,string"` // 用户ID
+	UserName    string `json:"user_name"`      // 用户名
+	UserGroup   string `json:"user_group"`     // 用户组
+	Description string `json:"description"`    // 描述
 }
 
 type UpdatePasswordParam struct {

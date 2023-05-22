@@ -80,8 +80,8 @@ func (a *LoginSrv) ResCaptcha(ctx context.Context, w http.ResponseWriter, captch
 //	return item, nil
 //}
 
-// VerifyByConfig TODO ----
-func (a *LoginSrv) VerifyByConfig(userName, password string) (*sysxml.UserConfigXml, error) {
+// Verify
+func (a *LoginSrv) Verify(userName, password string) (*sysxml.UserConfigXml, error) {
 	ok, user := schema.GetUserByUsername(userName)
 	if !ok {
 		return nil, errors.New400Response("not found user_name")
@@ -130,46 +130,66 @@ func (a *LoginSrv) checkAndGetUser(ctx context.Context, userID uint64) (*schema.
 }
 
 func (a *LoginSrv) GetLoginInfo(ctx context.Context, userID uint64) (*schema.UserLoginInfo, error) {
-	if isRoot := schema.CheckIsRootUser(ctx, userID); isRoot {
-		root := schema.GetRootUser()
-		loginInfo := &schema.UserLoginInfo{
-			UserName: root.UserName,
-			RealName: root.RealName,
-		}
-		return loginInfo, nil
-	}
-
-	user, err := a.checkAndGetUser(ctx, userID)
+	taf, err := sysxml.Get()
 	if err != nil {
 		return nil, err
 	}
-
-	info := &schema.UserLoginInfo{
-		UserID:   user.ID,
-		UserName: user.UserName,
-		RealName: user.RealName,
-	}
-
-	userRoleResult, err := a.UserRoleRepo.Query(ctx, schema.UserRoleQueryParam{
-		UserID: userID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if roleIDs := userRoleResult.Data.ToRoleIDs(); len(roleIDs) > 0 {
-		roleResult, err := a.RoleRepo.Query(ctx, schema.RoleQueryParam{
-			IDs:    roleIDs,
-			Status: 1,
-		})
-		if err != nil {
-			return nil, err
+	for _, v := range taf.System.User {
+		if v.UID == userID {
+			info := &schema.UserLoginInfo{
+				UserID:      v.UID,
+				UserName:    v.Name,
+				UserGroup:   v.GroupName,
+				Description: v.Description,
+			}
+			return info, nil
 		}
-		info.Roles = roleResult.Data
-	}
 
-	return info, nil
+	}
+	return nil, errors.ErrNotFound
 }
+
+//func (a *LoginSrv) GetLoginInfo(ctx context.Context, userID uint64) (*schema.UserLoginInfo, error) {
+//	if isRoot := schema.CheckIsRootUser(ctx, userID); isRoot {
+//		root := schema.GetRootUser()
+//		loginInfo := &schema.UserLoginInfo{
+//			UserName: root.UserName,
+//			RealName: root.RealName,
+//		}
+//		return loginInfo, nil
+//	}
+//
+//	user, err := a.checkAndGetUser(ctx, userID)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	info := &schema.UserLoginInfo{
+//		UserID:   user.ID,
+//		UserName: user.UserName,
+//		RealName: user.RealName,
+//	}
+//
+//	userRoleResult, err := a.UserRoleRepo.Query(ctx, schema.UserRoleQueryParam{
+//		UserID: userID,
+//	})
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	if roleIDs := userRoleResult.Data.ToRoleIDs(); len(roleIDs) > 0 {
+//		roleResult, err := a.RoleRepo.Query(ctx, schema.RoleQueryParam{
+//			IDs:    roleIDs,
+//			Status: 1,
+//		})
+//		if err != nil {
+//			return nil, err
+//		}
+//		info.Roles = roleResult.Data
+//	}
+//
+//	return info, nil
+//}
 
 func (a *LoginSrv) QueryUserMenuTree(ctx context.Context, userID uint64) (schema.MenuTrees, error) {
 	isRoot := schema.CheckIsRootUser(ctx, userID)
