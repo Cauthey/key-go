@@ -17,8 +17,8 @@ type System struct {
 	DnsAllowOverRide              string  `json:"dnsAllowOverRide"`
 	User                          []User  `json:"user"`
 	UserGroup                     []Group `json:"group"`
-	NextUid                       int     `json:"nextUid"`
-	NextGid                       int     `json:"nextGid"`
+	NextUid                       uint64  `json:"nextUid"`
+	NextGid                       uint64  `json:"nextGid"`
 	TimeZone                      string  `json:"timeZone"`
 	TimeServers                   string  `json:"timeServers"`
 	WebGui                        WebGui  `json:"webGui"`
@@ -48,7 +48,11 @@ type Item struct {
 }
 
 type WebGui struct {
-	Protocol string `json:"protocol"`
+	Protocol    string `json:"protocol"`
+	SslCertRef  string `json:"sslCertRef"`
+	NoAuto      string `json:"noAuto"`
+	Compression string `json:"compression"`
+	Interfaces  string `json:"interfaces"`
 }
 
 type Bogon struct {

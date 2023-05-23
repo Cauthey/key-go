@@ -15,7 +15,7 @@ type LoginParam struct {
 //}
 
 type UserLoginInfo struct {
-	UserID      uint   `json:"user_id,string"` // 用户ID
+	UserID      uint64 `json:"user_id,string"` // 用户ID
 	UserName    string `json:"user_name"`      // 用户名
 	UserGroup   string `json:"user_group"`     // 用户组
 	Description string `json:"description"`    // 描述

@@ -55,7 +55,7 @@ func GetUser() ([]schema.User, error) {
 }
 
 // GetUsersByGroupId 获取某用户组中的所有用户
-func GetUsersByGroupId(gid uint) ([]schema.User, error) {
+func GetUsersByGroupId(gid uint64) ([]schema.User, error) {
 	result, err := sysxml.Get()
 	if err != nil {
 		return []schema.User{}, err

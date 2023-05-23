@@ -5,7 +5,7 @@ type User struct {
 	Description    string `json:"description"`
 	GroupName      string `json:"groupName"`
 	Password       string `json:"password"`
-	UID            uint   `json:"uid"`
+	UID            uint64 `json:"uid"`
 	Expires        string `json:"expires"`
 	AuthorizedKeys string `json:"authorizedKeys"`
 	OtpSeed        string `json:"otpSeed"`
@@ -56,13 +56,13 @@ type User struct {
 //}
 
 // UserQueryParam 查询条件
-type UserQueryParam struct {
-	PaginationParam
-	UserName   string   `form:"userName"`   // 用户名
-	QueryValue string   `form:"queryValue"` // 模糊查询
-	Status     int      `form:"status"`     // 用户状态(1:启用 2:停用)
-	RoleIDs    []uint64 `form:"-"`          // 角色ID列表
-}
+//type UserQueryParam struct {
+//	PaginationParam
+//	UserName   string   `form:"userName"`   // 用户名
+//	QueryValue string   `form:"queryValue"` // 模糊查询
+//	Status     int      `form:"status"`     // 用户状态(1:启用 2:停用)
+//	RoleIDs    []uint64 `form:"-"`          // 角色ID列表
+//}
 
 //// UserQueryOptions 查询可选参数项
 //type UserQueryOptions struct {

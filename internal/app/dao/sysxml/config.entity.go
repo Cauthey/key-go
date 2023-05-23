@@ -24,8 +24,8 @@ type System struct {
 	DnsAllowOverRide              string   `xml:"dnsallowoverride"`
 	User                          []User   `xml:"user"`
 	UserGroup                     []Group  `xml:"group"`
-	NextUid                       int      `xml:"nextuid"`
-	NextGid                       int      `xml:"nextgid"`
+	NextUid                       uint64   `xml:"nextuid"`
+	NextGid                       uint64   `xml:"nextgid"`
 	Timezone                      string   `xml:"timezone"`
 	Timeservers                   string   `xml:"timeservers"`
 	WebGui                        WebGui   `xml:"webgui"`
@@ -54,7 +54,7 @@ type User struct {
 	Description    string   `xml:"descr"`
 	GroupName      string   `xml:"groupname"`
 	Password       string   `xml:"password"`
-	UID            uint     `xml:"uid"`
+	UID            uint64   `xml:"uid"`
 	Expires        string   `xml:"expires"`
 	AuthorizedKeys string   `xml:"authorizedkeys"`
 	OtpSeed        string   `xml:"otp_seed"`
@@ -69,8 +69,8 @@ type Group struct {
 	Name        string   `xml:"name"`
 	Description string   `xml:"description"`
 	Scope       string   `xml:"scope"`
-	GiD         uint     `xml:"gid"`
-	Member      []uint   `xml:"member"`
+	GiD         uint64   `xml:"gid"`
+	Member      []uint64 `xml:"member"`
 	Priv        string   `xml:"priv"`
 }
 type Item struct {
@@ -81,8 +81,12 @@ type Item struct {
 }
 
 type WebGui struct {
-	XMLName  xml.Name `xml:"webgui"`
-	Protocol string   `xml:"protocol"`
+	XMLName     xml.Name `xml:"webgui"`
+	Protocol    string   `xml:"protocol"`
+	SslCertRef  string   `xml:"ssl-certref"`
+	NoAuto      string   `xml:"noauto"`
+	Compression string   `xml:"compression"`
+	Interfaces  string   `xml:"interfaces"`
 }
 
 type Bogon struct {

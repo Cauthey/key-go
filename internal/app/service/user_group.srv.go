@@ -26,7 +26,7 @@ func GetUserGroup() ([]schema.Group, error) {
 }
 
 // GetUserGroupByUserId 获取某用户所在的所有用户组
-func GetUserGroupByUserId(uid uint) ([]schema.Group, error) {
+func GetUserGroupByUserId(uid uint64) ([]schema.Group, error) {
 	result, err := sysxml.Get()
 	if err != nil {
 		return nil, err

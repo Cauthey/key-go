@@ -124,7 +124,7 @@ func (a *LoginSrv) DestroyToken(ctx context.Context, tokenString string) error {
 	return nil
 }
 
-func (a *LoginSrv) checkAndGetUser(ctx context.Context, userID uint) (*schema.User, error) {
+func (a *LoginSrv) checkAndGetUser(ctx context.Context, userID uint64) (*schema.User, error) {
 	userList, err := GetUser()
 	if err != nil {
 		return nil, err
@@ -152,7 +152,7 @@ func (a *LoginSrv) checkAndGetUser(ctx context.Context, userID uint) (*schema.Us
 //	return user, nil
 //}
 
-func (a *LoginSrv) GetLoginInfo(ctx context.Context, userID uint) (*schema.UserLoginInfo, error) {
+func (a *LoginSrv) GetLoginInfo(ctx context.Context, userID uint64) (*schema.UserLoginInfo, error) {
 	userList, err := GetUser()
 	if err != nil {
 		return nil, err
