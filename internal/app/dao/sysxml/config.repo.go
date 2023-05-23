@@ -2,7 +2,6 @@ package sysxml
 
 import (
 	"encoding/xml"
-	"fmt"
 	"key-go/pkg/constant"
 	"os"
 )
@@ -25,6 +24,5 @@ func Get() (taf TAF, err error) {
 	if err != nil {
 		return TAF{}, err
 	}
-	fmt.Println("TAF:", configXml)
 	return configXml, nil
 }

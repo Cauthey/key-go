@@ -4,7 +4,6 @@ import (
 	"key-go/internal/app/config"
 	"key-go/internal/app/dao/menu"
 	"key-go/internal/app/dao/role"
-	"key-go/internal/app/dao/user"
 	"key-go/internal/app/dao/util"
 	"strings"
 
@@ -20,8 +19,8 @@ var RepoSet = wire.NewSet(
 	menu.MenuSet,
 	role.RoleMenuSet,
 	role.RoleSet,
-	user.UserRoleSet,
-	user.UserSet,
+	//user.UserRoleSet,
+	//user.UserSet,
 ) // end
 
 // Define repo type alias
@@ -32,8 +31,8 @@ type (
 	MenuRepo               = menu.MenuRepo
 	RoleMenuRepo           = role.RoleMenuRepo
 	RoleRepo               = role.RoleRepo
-	UserRoleRepo           = user.UserRoleRepo
-	UserRepo               = user.UserRepo
+	//UserRoleRepo           = user.UserRoleRepo
+	//UserRepo               = user.UserRepo
 ) // end
 
 // Auto migration for given models
@@ -48,7 +47,7 @@ func AutoMigrate(db *gorm.DB) error {
 		new(menu.Menu),
 		new(role.RoleMenu),
 		new(role.Role),
-		new(user.UserRole),
-		new(user.User),
+		//new(user.UserRole),
+		//new(user.User),
 	) // end
 }

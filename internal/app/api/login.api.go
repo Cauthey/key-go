@@ -66,8 +66,24 @@ func (a *LoginAPI) Login(c *gin.Context) {
 	//	return
 	//}
 
-	user, err := a.LoginSrv.Verify(item.UserName, item.Password)
+	// 验证用户是否存在/获取用户
+	ok, user := service.GetUserByUsername(item.UserName)
+	if !ok {
+		ginx.ResError(c, errors.New400Response("not found user_name"))
+		return
+	}
+
+	// 验证用户登录密码
+	err := a.LoginSrv.Verify(item.Password, user.Password)
 	if err != nil {
+		logger.WriteAuditLog(fmt.Sprintf("用户[%s]登录失败，密码错误", user.Name))
+		ginx.ResError(c, err)
+		return
+	}
+	// 验证用户是否在有效期内
+	ok = a.LoginSrv.VerifyUserValid(user)
+	if !ok {
+		logger.WriteAuditLog(fmt.Sprintf("用户[%s]登录失败，用户未在有效期内", user.Name))
 		ginx.ResError(c, err)
 		return
 	}
@@ -112,7 +128,7 @@ func (a *LoginAPI) RefreshToken(c *gin.Context) {
 
 func (a *LoginAPI) GetUserInfo(c *gin.Context) {
 	ctx := c.Request.Context()
-	info, err := a.LoginSrv.GetLoginInfo(ctx, contextx.FromUserID(ctx))
+	info, err := a.LoginSrv.GetLoginInfo(ctx, uint(contextx.FromUserID(ctx)))
 	if err != nil {
 		ginx.ResError(c, err)
 		return
@@ -121,13 +137,13 @@ func (a *LoginAPI) GetUserInfo(c *gin.Context) {
 }
 
 func (a *LoginAPI) QueryUserMenuTree(c *gin.Context) {
-	ctx := c.Request.Context()
-	menus, err := a.LoginSrv.QueryUserMenuTree(ctx, contextx.FromUserID(ctx))
-	if err != nil {
-		ginx.ResError(c, err)
-		return
-	}
-	ginx.ResList(c, menus)
+	//ctx := c.Request.Context()
+	//menus, err := a.LoginSrv.QueryUserMenuTree(ctx, contextx.FromUserID(ctx))
+	//if err != nil {
+	//	ginx.ResError(c, err)
+	//	return
+	//}
+	//ginx.ResList(c, menus)
 }
 
 func (a *LoginAPI) UpdatePassword(c *gin.Context) {

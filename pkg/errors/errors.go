@@ -24,4 +24,5 @@ var (
 	ErrBadRequest      = New400Response("bad request")
 	ErrInvalidParent   = New400Response("not found parent node")
 	ErrUserDisable     = New400Response("user forbidden")
+	ErrUserExpired     = New400Response("user expired")
 )

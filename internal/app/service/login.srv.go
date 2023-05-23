@@ -2,29 +2,24 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"key-go/internal/app/dao"
-	"key-go/internal/app/dao/sysxml"
 	"key-go/internal/app/schema"
 	"key-go/pkg/auth"
 	"key-go/pkg/errors"
-	"key-go/pkg/logger"
-	"key-go/pkg/util/hash"
-
-	"golang.org/x/crypto/bcrypt"
-	"net/http"
-	"sort"
+	"time"
 
 	"github.com/LyricTian/captcha"
 	"github.com/google/wire"
+	"golang.org/x/crypto/bcrypt"
+	"net/http"
 )
 
 var LoginSet = wire.NewSet(wire.Struct(new(LoginSrv), "*"))
 
 type LoginSrv struct {
-	Auth           auth.Auther
-	UserRepo       *dao.UserRepo
-	UserRoleRepo   *dao.UserRoleRepo
+	Auth auth.Auther
+	//UserRepo       *dao.UserRepo
+	//UserRoleRepo   *dao.UserRoleRepo
 	RoleRepo       *dao.RoleRepo
 	RoleMenuRepo   *dao.RoleMenuRepo
 	MenuRepo       *dao.MenuRepo
@@ -80,21 +75,33 @@ func (a *LoginSrv) ResCaptcha(ctx context.Context, w http.ResponseWriter, captch
 //	return item, nil
 //}
 
-// Verify
-func (a *LoginSrv) Verify(userName, password string) (*sysxml.UserConfigXml, error) {
-	ok, user := schema.GetUserByUsername(userName)
-	if !ok {
-		return nil, errors.New400Response("not found user_name")
-	}
+// Verify 验证用户密码
+func (a *LoginSrv) Verify(password, passwordVerify string) error {
 	// 根据用户名获取到的user信息与输入密码 password 对比校验
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		// 密码错误
-		logger.WriteAuditLog(fmt.Sprintf("用户[%s]登录失败，密码错误", userName))
-		return nil, errors.New400Response("password incorrect")
+	if err := bcrypt.CompareHashAndPassword([]byte(passwordVerify), []byte(password)); err != nil {
+		return errors.New400Response("password incorrect")
 	}
-	return user, nil
+	return nil
 }
 
+// VerifyUserValid 验证用户是否在有效期内
+func (a *LoginSrv) VerifyUserValid(user *schema.User) bool {
+	if user.Expires == "" {
+		return true
+	}
+	// 将用户有效期转换为时间
+	// 05/25/2023
+	timeStamp, err := time.Parse("01/02/2006", user.Expires)
+	if err != nil {
+		return false
+	}
+
+	// 比较当前时间与用户有效期时间
+	if time.Now().Before(timeStamp) {
+		return true
+	}
+	return false
+}
 func (a *LoginSrv) GenerateToken(ctx context.Context, userID string) (*schema.LoginTokenInfo, error) {
 	tokenInfo, err := a.Auth.GenerateToken(ctx, userID)
 	if err != nil {
@@ -117,24 +124,40 @@ func (a *LoginSrv) DestroyToken(ctx context.Context, tokenString string) error {
 	return nil
 }
 
-func (a *LoginSrv) checkAndGetUser(ctx context.Context, userID uint64) (*schema.User, error) {
-	user, err := a.UserRepo.Get(ctx, userID)
+func (a *LoginSrv) checkAndGetUser(ctx context.Context, userID uint) (*schema.User, error) {
+	userList, err := GetUser()
 	if err != nil {
 		return nil, err
-	} else if user == nil {
-		return nil, errors.ErrNotFound
-	} else if user.Status != 1 {
-		return nil, errors.ErrUserDisable
 	}
-	return user, nil
+	for _, v := range userList {
+		if v.UID == userID {
+			if !a.VerifyUserValid(&v) {
+				return nil, errors.ErrUserExpired
+			}
+			return &v, nil
+		}
+	}
+	return nil, errors.ErrNotFound
 }
 
-func (a *LoginSrv) GetLoginInfo(ctx context.Context, userID uint64) (*schema.UserLoginInfo, error) {
-	taf, err := sysxml.Get()
+//func (a *LoginSrv) checkAndGetUser(ctx context.Context, userID uint64) (*schema.User, error) {
+//	user, err := a.UserRepo.Get(ctx, userID)
+//	if err != nil {
+//		return nil, err
+//	} else if user == nil {
+//		return nil, errors.ErrNotFound
+//	} else if user.Status != 1 {
+//		return nil, errors.ErrUserDisable
+//	}
+//	return user, nil
+//}
+
+func (a *LoginSrv) GetLoginInfo(ctx context.Context, userID uint) (*schema.UserLoginInfo, error) {
+	userList, err := GetUser()
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range taf.System.User {
+	for _, v := range userList {
 		if v.UID == userID {
 			info := &schema.UserLoginInfo{
 				UserID:      v.UID,
@@ -144,7 +167,6 @@ func (a *LoginSrv) GetLoginInfo(ctx context.Context, userID uint64) (*schema.Use
 			}
 			return info, nil
 		}
-
 	}
 	return nil, errors.ErrNotFound
 }
@@ -191,94 +213,101 @@ func (a *LoginSrv) GetLoginInfo(ctx context.Context, userID uint64) (*schema.Use
 //	return info, nil
 //}
 
-func (a *LoginSrv) QueryUserMenuTree(ctx context.Context, userID uint64) (schema.MenuTrees, error) {
-	isRoot := schema.CheckIsRootUser(ctx, userID)
-	if isRoot {
-		result, err := a.MenuRepo.Query(ctx, schema.MenuQueryParam{
-			Status: 1,
-		}, schema.MenuQueryOptions{
-			OrderFields: schema.NewOrderFields(schema.NewOrderField("sequence", schema.OrderByDESC)),
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		menuActionResult, err := a.MenuActionRepo.Query(ctx, schema.MenuActionQueryParam{})
-		if err != nil {
-			return nil, err
-		}
-		return result.Data.FillMenuAction(menuActionResult.Data.ToMenuIDMap()).ToTree(), nil
-	}
-
-	userRoleResult, err := a.UserRoleRepo.Query(ctx, schema.UserRoleQueryParam{
-		UserID: userID,
-	})
-	if err != nil {
-		return nil, err
-	} else if len(userRoleResult.Data) == 0 {
-		return nil, errors.ErrNoPerm
-	}
-
-	roleMenuResult, err := a.RoleMenuRepo.Query(ctx, schema.RoleMenuQueryParam{
-		RoleIDs: userRoleResult.Data.ToRoleIDs(),
-	})
-	if err != nil {
-		return nil, err
-	} else if len(roleMenuResult.Data) == 0 {
-		return nil, errors.ErrNoPerm
-	}
-
-	menuResult, err := a.MenuRepo.Query(ctx, schema.MenuQueryParam{
-		IDs:    roleMenuResult.Data.ToMenuIDs(),
-		Status: 1,
-	})
-	if err != nil {
-		return nil, err
-	} else if len(menuResult.Data) == 0 {
-		return nil, errors.ErrNoPerm
-	}
-
-	mData := menuResult.Data.ToMap()
-
-	var qIDs []uint64
-	for _, pid := range menuResult.Data.SplitParentIDs() {
-		if _, ok := mData[pid]; !ok {
-			qIDs = append(qIDs, pid)
-		}
-	}
-
-	if len(qIDs) > 0 {
-		pmenuResult, err := a.MenuRepo.Query(ctx, schema.MenuQueryParam{
-			IDs: qIDs,
-		})
-		if err != nil {
-			return nil, err
-		}
-		menuResult.Data = append(menuResult.Data, pmenuResult.Data...)
-	}
-
-	sort.Sort(menuResult.Data)
-	menuActionResult, err := a.MenuActionRepo.Query(ctx, schema.MenuActionQueryParam{
-		IDs: roleMenuResult.Data.ToActionIDs(),
-	})
-	if err != nil {
-		return nil, err
-	}
-	return menuResult.Data.FillMenuAction(menuActionResult.Data.ToMenuIDMap()).ToTree(), nil
-}
+//func (a *LoginSrv) QueryUserMenuTree(ctx context.Context, userID uint64) (schema.MenuTrees, error) {
+//	isRoot := schema.CheckIsRootUser(ctx, userID)
+//	if isRoot {
+//		result, err := a.MenuRepo.Query(ctx, schema.MenuQueryParam{
+//			Status: 1,
+//		}, schema.MenuQueryOptions{
+//			OrderFields: schema.NewOrderFields(schema.NewOrderField("sequence", schema.OrderByDESC)),
+//		})
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		menuActionResult, err := a.MenuActionRepo.Query(ctx, schema.MenuActionQueryParam{})
+//		if err != nil {
+//			return nil, err
+//		}
+//		return result.Data.FillMenuAction(menuActionResult.Data.ToMenuIDMap()).ToTree(), nil
+//	}
+//
+//	userRoleResult, err := a.UserRoleRepo.Query(ctx, schema.UserRoleQueryParam{
+//		UserID: userID,
+//	})
+//	if err != nil {
+//		return nil, err
+//	} else if len(userRoleResult.Data) == 0 {
+//		return nil, errors.ErrNoPerm
+//	}
+//
+//	roleMenuResult, err := a.RoleMenuRepo.Query(ctx, schema.RoleMenuQueryParam{
+//		RoleIDs: userRoleResult.Data.ToRoleIDs(),
+//	})
+//	if err != nil {
+//		return nil, err
+//	} else if len(roleMenuResult.Data) == 0 {
+//		return nil, errors.ErrNoPerm
+//	}
+//
+//	menuResult, err := a.MenuRepo.Query(ctx, schema.MenuQueryParam{
+//		IDs:    roleMenuResult.Data.ToMenuIDs(),
+//		Status: 1,
+//	})
+//	if err != nil {
+//		return nil, err
+//	} else if len(menuResult.Data) == 0 {
+//		return nil, errors.ErrNoPerm
+//	}
+//
+//	mData := menuResult.Data.ToMap()
+//
+//	var qIDs []uint64
+//	for _, pid := range menuResult.Data.SplitParentIDs() {
+//		if _, ok := mData[pid]; !ok {
+//			qIDs = append(qIDs, pid)
+//		}
+//	}
+//
+//	if len(qIDs) > 0 {
+//		pmenuResult, err := a.MenuRepo.Query(ctx, schema.MenuQueryParam{
+//			IDs: qIDs,
+//		})
+//		if err != nil {
+//			return nil, err
+//		}
+//		menuResult.Data = append(menuResult.Data, pmenuResult.Data...)
+//	}
+//
+//	sort.Sort(menuResult.Data)
+//	menuActionResult, err := a.MenuActionRepo.Query(ctx, schema.MenuActionQueryParam{
+//		IDs: roleMenuResult.Data.ToActionIDs(),
+//	})
+//	if err != nil {
+//		return nil, err
+//	}
+//	return menuResult.Data.FillMenuAction(menuActionResult.Data.ToMenuIDMap()).ToTree(), nil
+//}
 
 func (a *LoginSrv) UpdatePassword(ctx context.Context, userID uint64, params schema.UpdatePasswordParam) error {
-	if schema.CheckIsRootUser(ctx, userID) {
-		return errors.New400Response("root用户不允许更新密码")
-	}
+	// 修改config.xml中的密码
 
-	user, err := a.checkAndGetUser(ctx, userID)
-	if err != nil {
-		return err
-	} else if hash.SHA1String(params.OldPassword) != user.Password {
-		return errors.New400Response("旧密码不正确")
-	}
-
-	params.NewPassword = hash.SHA1String(params.NewPassword)
-	return a.UserRepo.UpdatePassword(ctx, userID, params.NewPassword)
+	// 修改系统级的密码
+	return nil
 }
+
+//func (a *LoginSrv) UpdatePassword(ctx context.Context, userID uint64, params schema.UpdatePasswordParam) error {
+//	if schema.CheckIsRootUser(ctx, userID) {
+//		return errors.New400Response("root用户不允许更新密码")
+//	}
+//
+//	user, err := a.checkAndGetUser(ctx, userID)
+//	if err != nil {
+//		return err
+//	} else if hash.SHA1String(params.OldPassword) != user.Password {
+//		return errors.New400Response("旧密码不正确")
+//	}
+//
+//	params.NewPassword = hash.SHA1String(params.NewPassword)
+//	return a.UserRepo.UpdatePassword(ctx, userID, params.NewPassword)
+//}

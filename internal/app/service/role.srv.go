@@ -15,11 +15,11 @@ import (
 var RoleSet = wire.NewSet(wire.Struct(new(RoleSrv), "*"))
 
 type RoleSrv struct {
-	Enforcer               *casbin.SyncedEnforcer
-	TransRepo              *dao.TransRepo
-	RoleRepo               *dao.RoleRepo
-	RoleMenuRepo           *dao.RoleMenuRepo
-	UserRepo               *dao.UserRepo
+	Enforcer     *casbin.SyncedEnforcer
+	TransRepo    *dao.TransRepo
+	RoleRepo     *dao.RoleRepo
+	RoleMenuRepo *dao.RoleMenuRepo
+	//UserRepo               *dao.UserRepo
 	MenuActionResourceRepo *dao.MenuActionResourceRepo
 }
 
@@ -190,15 +190,15 @@ func (a *RoleSrv) Delete(ctx context.Context, id uint64) error {
 		return errors.ErrNotFound
 	}
 
-	userResult, err := a.UserRepo.Query(ctx, schema.UserQueryParam{
-		PaginationParam: schema.PaginationParam{OnlyCount: true},
-		RoleIDs:         []uint64{id},
-	})
-	if err != nil {
-		return err
-	} else if userResult.PageResult.Total > 0 {
-		return errors.New400Response("不允许删除已经存在用户的角色")
-	}
+	//userResult, err := a.UserRepo.Query(ctx, schema.UserQueryParam{
+	//	PaginationParam: schema.PaginationParam{OnlyCount: true},
+	//	RoleIDs:         []uint64{id},
+	//})
+	//if err != nil {
+	//	return err
+	//} else if userResult.PageResult.Total > 0 {
+	//	return errors.New400Response("不允许删除已经存在用户的角色")
+	//}
 
 	err = a.TransRepo.Exec(ctx, func(ctx context.Context) error {
 		err := a.RoleMenuRepo.DeleteByRoleID(ctx, id)

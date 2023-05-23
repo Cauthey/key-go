@@ -20,8 +20,8 @@ type CasbinAdapter struct {
 	RoleRepo         *dao.RoleRepo
 	RoleMenuRepo     *dao.RoleMenuRepo
 	MenuResourceRepo *dao.MenuActionResourceRepo
-	UserRepo         *dao.UserRepo
-	UserRoleRepo     *dao.UserRoleRepo
+	//UserRepo         *dao.UserRepo
+	//UserRoleRepo     *dao.UserRoleRepo
 }
 
 // Loads all policy rules from the storage.
@@ -90,27 +90,27 @@ func (a *CasbinAdapter) loadRolePolicy(ctx context.Context, m casbinModel.Model)
 
 // Load user policy (g,user_id,role_id)
 func (a *CasbinAdapter) loadUserPolicy(ctx context.Context, m casbinModel.Model) error {
-	userResult, err := a.UserRepo.Query(ctx, schema.UserQueryParam{
-		Status: 1,
-	})
-	if err != nil {
-		return err
-	} else if len(userResult.Data) > 0 {
-		userRoleResult, err := a.UserRoleRepo.Query(ctx, schema.UserRoleQueryParam{})
-		if err != nil {
-			return err
-		}
-
-		mUserRoles := userRoleResult.Data.ToUserIDMap()
-		for _, uitem := range userResult.Data {
-			if urs, ok := mUserRoles[uitem.ID]; ok {
-				for _, ur := range urs {
-					line := fmt.Sprintf("g,%d,%d", ur.UserID, ur.RoleID)
-					persist.LoadPolicyLine(line, m)
-				}
-			}
-		}
-	}
+	//userResult, err := a.UserRepo.Query(ctx, schema.UserQueryParam{
+	//	Status: 1,
+	//})
+	//if err != nil {
+	//	return err
+	//} else if len(userResult.Data) > 0 {
+	//	userRoleResult, err := a.UserRoleRepo.Query(ctx, schema.UserRoleQueryParam{})
+	//	if err != nil {
+	//		return err
+	//	}
+	//
+	//	mUserRoles := userRoleResult.Data.ToUserIDMap()
+	//	for _, uitem := range userResult.Data {
+	//		if urs, ok := mUserRoles[uitem.ID]; ok {
+	//			for _, ur := range urs {
+	//				line := fmt.Sprintf("g,%d,%d", ur.UserID, ur.RoleID)
+	//				persist.LoadPolicyLine(line, m)
+	//			}
+	//		}
+	//	}
+	//}
 
 	return nil
 }
