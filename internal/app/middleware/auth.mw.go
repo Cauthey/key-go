@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"key-go/internal/app/contextx"
 	"key-go/internal/app/ginx"
 	"key-go/pkg/auth"
@@ -33,12 +32,7 @@ func UserAuthMiddleware(a auth.Auther, skippers ...SkipperFunc) gin.HandlerFunc 
 		if SkipHandler(c, skippers...) {
 			return
 		}
-
 		tokenUserID, err := a.ParseUserID(c.Request.Context(), ginx.GetToken(c))
-
-		fmt.Println("tokenUserID: ", tokenUserID)
-		fmt.Println("err: ", err)
-
 		if err != nil {
 			if err == auth.ErrInvalidToken {
 				//if config.C.IsDebugMode() {

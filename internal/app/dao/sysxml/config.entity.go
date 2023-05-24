@@ -13,7 +13,7 @@ type TAF struct {
 
 type Sysctl struct {
 	XMLName xml.Name `xml:"sysctl"`
-	//Item    []Item   `xml:"item"`
+	Item    []Item   `xml:"item"`
 }
 
 type System struct {

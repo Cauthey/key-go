@@ -25,8 +25,7 @@ ShutdownTimeout = 30
 MaxContentLength = 67108864
 # 允许输出的最大请求日志长度
 MaxReqLoggerLength = 1024
-# 会话连接的过期时长
-SessionExpire = 1800
+
 
 [Menu]
 # 使用启用初始化菜单数据
@@ -104,7 +103,7 @@ SigningMethod = "HS512"
 # 签名key
 SigningKey = "key-go"
 # 过期时间（单位秒）
-Expired = 7200
+Expired = 30
 # 存储(支持：file/redis)
 Store = "file"
 # 文件路径

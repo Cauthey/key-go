@@ -1,5 +1,7 @@
 package schema
 
+import "key-go/internal/app/dao/sysxml"
+
 type User struct {
 	Name           string `json:"name"`
 	Description    string `json:"description"`
@@ -13,6 +15,38 @@ type User struct {
 	LandingPage    string `json:"landingPage"`
 	Shell          string `json:"shell"`
 	Cert           string `json:"cert"`
+}
+
+func (u *User) ToSysXmlUser() *sysxml.User {
+	return &sysxml.User{
+		Name:           u.Name,
+		Description:    u.Description,
+		GroupName:      u.GroupName,
+		Password:       u.Password,
+		UID:            u.UID,
+		Expires:        u.Expires,
+		AuthorizedKeys: u.AuthorizedKeys,
+		OtpSeed:        u.OtpSeed,
+		Comment:        u.Comment,
+		LandingPage:    u.LandingPage,
+		Shell:          u.Shell,
+		Cert:           u.Cert,
+	}
+}
+func (u *User) ToUser(user *sysxml.User) User {
+	u.Name = user.Name
+	u.Description = user.Description
+	u.GroupName = user.GroupName
+	u.Password = user.Password
+	u.UID = user.UID
+	u.Expires = user.Expires
+	u.AuthorizedKeys = user.AuthorizedKeys
+	u.OtpSeed = user.OtpSeed
+	u.Comment = user.Comment
+	u.LandingPage = user.LandingPage
+	u.Shell = user.Shell
+	u.Cert = user.Cert
+	return *u
 }
 
 //// GetRootUser 获取root用户

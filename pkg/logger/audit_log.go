@@ -15,7 +15,8 @@ func WriteAuditLog(info string) {
 	if index == -1 || index == len(info)-1 {
 		info += "\n"
 	}
-	err := files.WriteFileByAddContent(logPath, info)
+	nowStr := time.Now().Format("2006-01-02 15:04:05")
+	err := files.WriteFileByAddContent(logPath, nowStr+" "+info)
 	if err != nil {
 		panic(err)
 	}

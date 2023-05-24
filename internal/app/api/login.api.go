@@ -76,14 +76,14 @@ func (a *LoginAPI) Login(c *gin.Context) {
 	// 验证用户登录密码
 	err := a.LoginSrv.Verify(item.Password, user.Password)
 	if err != nil {
-		logger.WriteAuditLog(fmt.Sprintf("用户[%s]登录失败，密码错误", user.Name))
+		logger.WriteAuditLog(fmt.Sprintf("user [%s] login failed, user or password incorrect ", user.Name))
 		ginx.ResError(c, err)
 		return
 	}
 	// 验证用户是否在有效期内
 	ok = a.LoginSrv.VerifyUserValid(user)
 	if !ok {
-		logger.WriteAuditLog(fmt.Sprintf("用户[%s]登录失败，用户未在有效期内", user.Name))
+		logger.WriteAuditLog(fmt.Sprintf("user [%s] login failed, expired ", user.Name))
 		ginx.ResError(c, err)
 		return
 	}
@@ -103,8 +103,6 @@ func (a *LoginAPI) Logout(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	userID := contextx.FromUserID(ctx)
-
-	fmt.Println("logout========userID:", userID)
 
 	if userID != 0 {
 		ctx = logger.NewTagContext(ctx, "__logout__")
@@ -129,7 +127,6 @@ func (a *LoginAPI) RefreshToken(c *gin.Context) {
 
 func (a *LoginAPI) GetUserInfo(c *gin.Context) {
 	ctx := c.Request.Context()
-	fmt.Println("getinfo========userid", contextx.FromUserID(ctx))
 	info, err := a.LoginSrv.GetLoginInfo(ctx, contextx.FromUserID(ctx))
 	if err != nil {
 		ginx.ResError(c, err)

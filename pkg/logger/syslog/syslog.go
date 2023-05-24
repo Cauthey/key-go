@@ -3,14 +3,16 @@ package syslog
 import (
 	"key-go/pkg/constant"
 	"log/syslog"
+	"time"
 )
 
 func SendSyslog(level, content string) error {
-	sysLog, err := syslog.Dial("udp", "localhost:514",
+	sysLog, err := syslog.Dial("tcp", "localhost:514",
 		syslog.LOG_DAEMON, "TAF")
 	if err != nil {
-		return err
+		return sysLog
 	}
+	content = "TAF: " + time.Now().Format("2006-01-02 15:04:05") + " " + content
 	switch level {
 	case constant.LogLevelFatal:
 		sysLog.Crit(content)

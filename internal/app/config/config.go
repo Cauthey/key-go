@@ -65,18 +65,18 @@ type Config struct {
 	Log          Log
 	LogGormHook  LogGormHook
 	LogMongoHook LogMongoHook
-	Root         Root
-	JWTAuth      JWTAuth
-	Monitor      Monitor
-	Captcha      Captcha
-	RateLimiter  RateLimiter
-	CORS         CORS
-	GZIP         GZIP
-	Redis        Redis
-	Gorm         Gorm
-	MySQL        MySQL
-	Postgres     Postgres
-	Sqlite3      Sqlite3
+	//Root         Root
+	JWTAuth     JWTAuth
+	Monitor     Monitor
+	Captcha     Captcha
+	RateLimiter RateLimiter
+	CORS        CORS
+	GZIP        GZIP
+	Redis       Redis
+	Gorm        Gorm
+	MySQL       MySQL
+	Postgres    Postgres
+	Sqlite3     Sqlite3
 }
 
 func (c *Config) IsDebugMode() bool {
@@ -128,12 +128,12 @@ type LogMongoHook struct {
 	Collection string
 }
 
-type Root struct {
-	UserID   uint64
-	UserName string
-	Password string
-	RealName string
-}
+//type Root struct {
+//	UserID   uint64
+//	UserName string
+//	Password string
+//	RealName string
+//}
 
 type JWTAuth struct {
 	Enable        bool
@@ -155,7 +155,6 @@ type HTTP struct {
 	MaxContentLength   int64
 	MaxReqLoggerLength int `default:"1024"`
 	MaxResLoggerLength int
-	SessionExpire      int `default:"1800"`
 }
 
 type Monitor struct {
