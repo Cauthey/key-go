@@ -28,6 +28,29 @@ func GetUserByUsername(username string) (bool, *schema.User) {
 	return false, nil
 }
 
+// GetRootUser 获取root用户
+func GetRootUser() (*schema.User, error) {
+	result, err := sysxml.Get()
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range result.System.User {
+		if v.Name == "root" {
+			return &schema.User{
+				Name:           v.Name,
+				Description:    v.Description,
+				GroupName:      v.GroupName,
+				Password:       v.Password,
+				UID:            v.UID,
+				Expires:        v.Expires,
+				AuthorizedKeys: v.AuthorizedKeys,
+				OtpSeed:        v.OtpSeed,
+			}, nil
+		}
+	}
+	return nil, nil
+}
+
 // GetUser 获取所有用户
 func GetUser() ([]schema.User, error) {
 	result, err := sysxml.Get()

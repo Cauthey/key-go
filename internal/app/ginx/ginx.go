@@ -2,16 +2,14 @@ package ginx
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"key-go/internal/app/schema"
 	"key-go/pkg/errors"
 	"key-go/pkg/logger"
 	"key-go/pkg/util/json"
 	"net/http"
 	"strconv"
-	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 )
 
 const (
@@ -22,13 +20,13 @@ const (
 
 // Get jwt token from header (Authorization: Bearer xxx)
 func GetToken(c *gin.Context) string {
-	var token string
-	auth := c.GetHeader("Authorization")
-	prefix := "Bearer "
-	if auth != "" && strings.HasPrefix(auth, prefix) {
-		token = auth[len(prefix):]
-	}
-	return token
+	//var token string
+	//auth := c.GetHeader("Authorization")
+	//prefix := "Bearer "
+	//if auth != "" && strings.HasPrefix(auth, prefix) {
+	//	token = auth[len(prefix):]
+	//}
+	return c.GetHeader("Access_token")
 }
 
 // Get body data from context

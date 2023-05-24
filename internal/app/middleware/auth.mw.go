@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"key-go/internal/app/config"
+	"fmt"
 	"key-go/internal/app/contextx"
 	"key-go/internal/app/ginx"
 	"key-go/pkg/auth"
@@ -23,27 +23,35 @@ func wrapUserAuthContext(c *gin.Context, userID uint64, userName string) {
 
 // Valid user token (jwt)
 func UserAuthMiddleware(a auth.Auther, skippers ...SkipperFunc) gin.HandlerFunc {
-	if !config.C.JWTAuth.Enable {
-		return func(c *gin.Context) {
-			wrapUserAuthContext(c, config.C.Root.UserID, config.C.Root.UserName)
-			c.Next()
-		}
-	}
-
+	//if !config.C.JWTAuth.Enable {
+	//	return func(c *gin.Context) {
+	//		wrapUserAuthContext(c, config.C.Root.UserID, config.C.Root.UserName)
+	//		c.Next()
+	//	}
+	//}
 	return func(c *gin.Context) {
 		if SkipHandler(c, skippers...) {
-			c.Next()
 			return
 		}
 
 		tokenUserID, err := a.ParseUserID(c.Request.Context(), ginx.GetToken(c))
+
+		fmt.Println("tokenUserID: ", tokenUserID)
+		fmt.Println("err: ", err)
+
 		if err != nil {
 			if err == auth.ErrInvalidToken {
-				if config.C.IsDebugMode() {
-					wrapUserAuthContext(c, config.C.Root.UserID, config.C.Root.UserName)
-					c.Next()
-					return
-				}
+				//if config.C.IsDebugMode() {
+				//	//wrapUserAuthContext(c, config.C.Root.UserID, config.C.Root.UserName)
+				//	//c.Next()
+				//	//return
+				//	user, err := service.GetRootUser()
+				//	if err == nil {
+				//		wrapUserAuthContext(c, user.UID, user.Name)
+				//		c.Next()
+				//		return
+				//	}
+				//}
 				ginx.ResError(c, errors.ErrInvalidToken)
 				return
 			}

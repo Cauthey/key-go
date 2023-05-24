@@ -87,13 +87,11 @@ func (a *LoginAPI) Login(c *gin.Context) {
 		ginx.ResError(c, err)
 		return
 	}
-
-	tokenInfo, err := a.LoginSrv.GenerateToken(ctx, a.formatTokenUserID(uint64(user.UID), user.Name))
+	tokenInfo, err := a.LoginSrv.GenerateToken(ctx, a.formatTokenUserID(user.UID, user.Name))
 	if err != nil {
 		ginx.ResError(c, err)
 		return
 	}
-
 	ginx.ResSuccess(c, tokenInfo)
 }
 
@@ -106,9 +104,7 @@ func (a *LoginAPI) Logout(c *gin.Context) {
 
 	userID := contextx.FromUserID(ctx)
 
-	fmt.Println("userID ========================>>>>", userID)
-
-	fmt.Println("ginx.GetToken(c)========================>>>>", ginx.GetToken(c))
+	fmt.Println("logout========userID:", userID)
 
 	if userID != 0 {
 		ctx = logger.NewTagContext(ctx, "__logout__")
@@ -133,7 +129,7 @@ func (a *LoginAPI) RefreshToken(c *gin.Context) {
 
 func (a *LoginAPI) GetUserInfo(c *gin.Context) {
 	ctx := c.Request.Context()
-	fmt.Println("contextx.FromUserID(ctx)========================>>>>", contextx.FromUserID(ctx))
+	fmt.Println("getinfo========userid", contextx.FromUserID(ctx))
 	info, err := a.LoginSrv.GetLoginInfo(ctx, contextx.FromUserID(ctx))
 	if err != nil {
 		ginx.ResError(c, err)

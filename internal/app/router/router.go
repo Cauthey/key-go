@@ -61,7 +61,6 @@ func (a *Router) RegisterAPI(app *gin.Engine) {
 				gLogin.GET("captchaid", a.LoginAPI.GetCaptcha)
 				gLogin.GET("captcha", a.LoginAPI.ResCaptcha)
 				gLogin.POST("", a.LoginAPI.Login)
-				gLogin.POST("exit", a.LoginAPI.Logout)
 			}
 
 			gCurrent := pub.Group("current")
@@ -70,6 +69,7 @@ func (a *Router) RegisterAPI(app *gin.Engine) {
 				gCurrent.GET("user", a.LoginAPI.GetUserInfo)
 				gCurrent.GET("menutree", a.LoginAPI.QueryUserMenuTree)
 			}
+			pub.POST("/logout", a.LoginAPI.Logout)
 			pub.POST("/refresh-token", a.LoginAPI.RefreshToken)
 		}
 
