@@ -2,6 +2,7 @@ package app
 
 import (
 	"key-go/internal/app/config"
+	"key-go/pkg/constant"
 	"key-go/pkg/logger"
 	"os"
 	"path/filepath"
@@ -26,20 +27,22 @@ func InitLogger() (func(), error) {
 		case "stderr":
 			logger.SetOutput(os.Stderr)
 		case "file":
-			if name := c.OutputFile; name != "" {
-				_ = os.MkdirAll(filepath.Dir(name), 0777)
-
-				f, err := rotatelogs.New(name+".%Y-%m-%d",
-					rotatelogs.WithLinkName(name),
-					rotatelogs.WithRotationTime(time.Duration(c.RotationTime)*time.Hour),
-					rotatelogs.WithRotationCount(uint(c.RotationCount)))
-				if err != nil {
-					return nil, err
-				}
-
-				logger.SetOutput(f)
-				file = f
+			var name string
+			if config.C.RunMode == "release" {
+				name = constant.SystemLogPath
+			} else {
+				name = c.OutputFile
 			}
+			_ = os.MkdirAll(filepath.Dir(name), 0777)
+			f, err := rotatelogs.New(name+".%Y-%m-%d",
+				rotatelogs.WithLinkName(name),
+				rotatelogs.WithRotationTime(time.Duration(c.RotationTime)*time.Hour),
+				rotatelogs.WithRotationCount(uint(c.RotationCount)))
+			if err != nil {
+				return nil, err
+			}
+			logger.SetOutput(f)
+			file = f
 		}
 	}
 
@@ -61,13 +64,13 @@ func InitLogger() (func(), error) {
 				return nil, err
 			}
 
-			h := loggerhook.New(loggergormhook.New(db),
+			h1 := loggerhook.New(loggergormhook.New(db),
 				loggerhook.SetMaxWorkers(c.HookMaxThread),
 				loggerhook.SetMaxQueues(c.HookMaxBuffer),
 				loggerhook.SetLevels(hookLevels...),
 			)
-			logger.AddHook(h)
-			hook = h
+			logger.AddHook(h1)
+			hook = h1
 		}
 	}
 

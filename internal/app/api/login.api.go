@@ -5,14 +5,13 @@ import (
 	"github.com/LyricTian/captcha"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
+	"key-go/internal/app/config"
 	"key-go/internal/app/contextx"
 	"key-go/internal/app/ginx"
 	"key-go/internal/app/schema"
 	"key-go/internal/app/service"
 	"key-go/pkg/errors"
 	"key-go/pkg/logger"
-
-	"key-go/internal/app/config"
 )
 
 var LoginSet = wire.NewSet(wire.Struct(new(LoginAPI), "*"))
@@ -76,14 +75,14 @@ func (a *LoginAPI) Login(c *gin.Context) {
 	// 验证用户登录密码
 	err := a.LoginSrv.Verify(item.Password, user.Password)
 	if err != nil {
-		logger.WriteAuditLog(fmt.Sprintf("user [%s] login failed, user or password incorrect ", user.Name))
+		logger.AuditLog(fmt.Sprintf("user [%s] login failed, user or password incorrect ", user.Name))
 		ginx.ResError(c, err)
 		return
 	}
 	// 验证用户是否在有效期内
 	ok = a.LoginSrv.VerifyUserValid(user)
 	if !ok {
-		logger.WriteAuditLog(fmt.Sprintf("user [%s] login failed, expired ", user.Name))
+		logger.AuditLog(fmt.Sprintf("user [%s] login failed, expired ", user.Name))
 		ginx.ResError(c, err)
 		return
 	}

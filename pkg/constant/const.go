@@ -4,7 +4,10 @@ package constant
 
 const (
 	// AuditLogPath 审计日志：记录所有用户的登录、退出、权限切换等信息
-	AuditLogPath = "/var/log/audit"
+	AuditLogPath = "/var/log/audit/audit.log"
+
+	// SystemLogPath 系统日志：记录所有与系统安全有关的事件
+	SystemLogPath = "/var/log/system/system.log"
 
 	//// AccessLogPath 访问日志：记录所有进出防火墙的数据包，包括源 IP、目标 IP、协议、端口等信息
 	//AccessLogPath = "/var/log/access.log"
@@ -29,15 +32,6 @@ const (
 	//
 	//// SystemPerformanceLogPath 系统性能日志：记录系统的性能信息，包括CPU、内存、磁盘空间等指标
 	//SystemPerformanceLogPath = "/var/log/system_performance.log"
-)
-
-// 日志级别
-const (
-	LogLevelFatal = "fatal"
-	LogLevelError = "error"
-	LogLevelWarn  = "warn"
-	LogLevelInfo  = "info"
-	LogLevelDebug = "debug"
 )
 
 // 配置文件路径
