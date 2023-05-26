@@ -25,7 +25,7 @@ func (a SchemaUser) ToUser() *User {
 
 type User struct {
 	util.Model
-	Name           string    `json:"name"`             // 用户名
+	Name           string    `json:"user_name"`        // 用户名
 	Password       string    `json:"password"`         // 密码
 	Scope          string    `json:"scope"`            // 用户的权限范围
 	Description    string    `json:"description"`      // 描述

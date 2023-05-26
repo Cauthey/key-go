@@ -2,7 +2,9 @@ package dao
 
 import (
 	"key-go/internal/app/config"
+	"key-go/internal/app/dao/apikey"
 	"key-go/internal/app/dao/menu"
+	"key-go/internal/app/dao/property"
 	"key-go/internal/app/dao/role"
 	"key-go/internal/app/dao/user"
 	"key-go/internal/app/dao/util"
@@ -22,6 +24,9 @@ var RepoSet = wire.NewSet(
 	role.RoleSet,
 	user.UserRoleSet,
 	user.UserSet,
+	property.PropertySet,
+	user.UserApiKeySet,
+	apikey.ApiKeySet,
 ) // end
 
 // Define repo type alias
@@ -34,6 +39,9 @@ type (
 	RoleRepo               = role.RoleRepo
 	UserRoleRepo           = user.UserRoleRepo
 	UserRepo               = user.UserRepo
+	PropertyRepo           = property.PropertyRepo
+	UserApiKeyRepo         = user.UserApiKeyRepo
+	ApiKeyRepo             = apikey.ApiKeyRepo
 ) // end
 
 // Auto migration for given models
@@ -48,7 +56,10 @@ func AutoMigrate(db *gorm.DB) error {
 		new(menu.Menu),
 		new(role.RoleMenu),
 		new(role.Role),
-		//new(user.UserRole),
-		//new(user.User),
+		new(user.UserRole),
+		new(user.User),
+		new(property.Property),
+		new(user.UserApiKey),
+		new(apikey.ApiKey),
 	) // end
 }

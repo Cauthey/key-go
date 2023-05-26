@@ -46,9 +46,9 @@ func (a *Router) RegisterAPI(app *gin.Engine) {
 		middleware.AllowPathPrefixSkipper("/api/v1/pub/login"),
 	))
 
-	g.Use(middleware.CasbinMiddleware(a.CasbinEnforcer,
-		middleware.AllowPathPrefixSkipper("/api/v1/pub"),
-	))
+	//g.Use(middleware.CasbinMiddleware(a.CasbinEnforcer,
+	//	middleware.AllowPathPrefixSkipper("/api/v1/pub"),
+	//))
 
 	g.Use(middleware.RateLimiterMiddleware())
 
@@ -104,8 +104,8 @@ func (a *Router) RegisterAPI(app *gin.Engine) {
 			gUser.POST("", a.UserAPI.Create)
 			gUser.PUT(":id", a.UserAPI.Update)
 			gUser.DELETE(":id", a.UserAPI.Delete)
-			//gUser.PATCH(":id/enable", a.UserAPI.Enable)
-			//gUser.PATCH(":id/disable", a.UserAPI.Disable)
+			gUser.PATCH(":id/enable", a.UserAPI.Enable)
+			gUser.PATCH(":id/disable", a.UserAPI.Disable)
 		}
 	} // v1 end
 }

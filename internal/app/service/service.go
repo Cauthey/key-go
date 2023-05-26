@@ -9,4 +9,5 @@ var ServiceSet = wire.NewSet(
 	RoleSet,
 	UserSet,
 	LoginSet,
+	PropertySet,
 ) // end

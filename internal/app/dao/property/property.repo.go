@@ -1,4 +1,4 @@
-package role
+package property
 
 import (
 	"context"
@@ -10,33 +10,30 @@ import (
 	"gorm.io/gorm"
 )
 
-var Property = wire.NewSet(wire.Struct(new(PropertyRepo), "*"))
+var PropertySet = wire.NewSet(wire.Struct(new(PropertyRepo), "*"))
 
 type PropertyRepo struct {
 	DB *gorm.DB
 }
 
-func (a *PropertyRepo) getQueryOption(opts ...schema.RoleQueryOptions) schema.RoleQueryOptions {
-	var opt schema.RoleQueryOptions
+func (a *PropertyRepo) getQueryOption(ctx context.Context, opts ...schema.PropertyQueryOptions) schema.PropertyQueryOptions {
+	var opt schema.PropertyQueryOptions
 	if len(opts) > 0 {
 		opt = opts[0]
 	}
 	return opt
 }
 
-func (a *PropertyRepo) Query(ctx context.Context, params schema.RoleQueryParam, opts ...schema.RoleQueryOptions) (*schema.RoleQueryResult, error) {
-	opt := a.getQueryOption(opts...)
+func (a *PropertyRepo) Query(ctx context.Context, params schema.PropertyQueryParam, opts ...schema.PropertyQueryOptions) (*schema.PropertyQueryResult, error) {
+	opt := a.getQueryOption(ctx, opts...)
 
-	db := GetRoleDB(ctx, a.DB)
-	if v := params.IDs; len(v) > 0 {
-		db = db.Where("id IN (?)", v)
-	}
+	db := GetPropertyDB(ctx, a.DB)
 	if v := params.Name; v != "" {
 		db = db.Where("name=?", v)
 	}
 	if v := params.QueryValue; v != "" {
 		v = "%" + v + "%"
-		db = db.Where("name LIKE ?", v)
+		db = db.Where("name LIKE ? OR value LIKE ?", v, v)
 	}
 
 	if len(opt.SelectFields) > 0 {
@@ -47,49 +44,71 @@ func (a *PropertyRepo) Query(ctx context.Context, params schema.RoleQueryParam, 
 		db = db.Order(util.ParseOrder(opt.OrderFields))
 	}
 
-	var list Roles
+	var list Properties
 	pr, err := util.WrapPageQuery(ctx, db, params.PaginationParam, &list)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	qr := &schema.RoleQueryResult{
-		PageResult: pr,
-		Data:       list.ToSchemaRoles(),
-	}
 
+	qr := &schema.PropertyQueryResult{
+		PageResult: pr,
+		Data:       list.ToSchemaProperties(),
+	}
 	return qr, nil
 }
 
-func (a *PropertyRepo) Get(ctx context.Context, id uint64, opts ...schema.RoleQueryOptions) (*schema.Role, error) {
-	var role Role
-	ok, err := util.FindOne(ctx, GetRoleDB(ctx, a.DB).Where("id=?", id), &role)
+func (a *PropertyRepo) FindPropertyMap(ctx context.Context, name string) map[string]string {
+	properties := a.FindAu(ctx, name)
+	propertyMap := make(map[string]string)
+	for i := range properties {
+		propertyMap[properties[i].Name] = properties[i].Value
+	}
+	return propertyMap
+}
+
+func (a *PropertyRepo) FindAu(ctx context.Context, name string) (o []Property) {
+	if GetPropertyDB(ctx, a.DB).Model(Property{}).Where("name like ?", name+"%").Find(&o).Error != nil {
+		return nil
+	}
+	return
+}
+
+func (a *PropertyRepo) Get(ctx context.Context, name string, opts ...schema.PropertyQueryOptions) (*schema.Property, error) {
+	var item Property
+	ok, err := util.FindOne(ctx, GetPropertyDB(ctx, a.DB).Where("name=?", name), &item)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	} else if !ok {
 		return nil, nil
 	}
-
-	return role.ToSchemaRole(), nil
+	return item.ToSchemaProperty(), nil
 }
 
-func (a *PropertyRepo) Create(ctx context.Context, item schema.Role) error {
-	eitem := SchemaRole(item).ToRole()
-	result := GetRoleDB(ctx, a.DB).Create(eitem)
+func (a *PropertyRepo) Create(ctx context.Context, item schema.Property) error {
+	eitem := SchemaProperty(item).ToProperty()
+	result := GetPropertyDB(ctx, a.DB).Create(eitem)
 	return errors.WithStack(result.Error)
 }
 
-func (a *PropertyRepo) Update(ctx context.Context, id uint64, item schema.Role) error {
-	eitem := SchemaRole(item).ToRole()
-	result := GetRoleDB(ctx, a.DB).Where("id=?", id).Updates(eitem)
+func (a *PropertyRepo) CreateByMap(ctx context.Context, m map[string]interface{}) (err error) {
+	var o Property
+	for k, v := range m {
+		o.Name = k
+		o.Value = v.(string)
+		if err = GetPropertyDB(ctx, a.DB).Create(&o).Error; err != nil {
+			return
+		}
+	}
+	return
+}
+
+func (a *PropertyRepo) Update(ctx context.Context, name string, item schema.Property) error {
+	eitem := SchemaProperty(item).ToProperty()
+	result := GetPropertyDB(ctx, a.DB).Where("name=?", name).Updates(eitem)
 	return errors.WithStack(result.Error)
 }
 
-func (a *PropertyRepo) Delete(ctx context.Context, id uint64) error {
-	result := GetRoleDB(ctx, a.DB).Where("id=?", id).Delete(Role{})
-	return errors.WithStack(result.Error)
-}
-
-func (a *PropertyRepo) UpdateStatus(ctx context.Context, id uint64, status int) error {
-	result := GetRoleDB(ctx, a.DB).Where("id=?", id).Update("status", status)
+func (a *PropertyRepo) Delete(ctx context.Context, name string) error {
+	result := GetPropertyDB(ctx, a.DB).Where("name=?", name).Delete(Property{})
 	return errors.WithStack(result.Error)
 }

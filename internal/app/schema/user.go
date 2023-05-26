@@ -28,8 +28,8 @@ func CheckIsRootUser(ctx context.Context, userID uint64) bool {
 
 // User 用户对象
 type User struct {
-	ID             uint64    `json:"id,string"`        // 用户ID
-	Name           string    `json:"name"`             // 用户名
+	ID             uint64    `json:"id"`               // 用户ID
+	Name           string    `json:"user_name"`        // 用户名
 	Password       string    `json:"password"`         // 密码
 	Scope          string    `json:"scope"`            // 用户的权限范围
 	CreatedAt      time.Time `json:"created_at"`       // 创建时间
@@ -109,11 +109,11 @@ func (a Users) ToUserShows(mUserRoles map[uint64]UserRoles, mRoles map[uint64]*R
 	for i, item := range a {
 		showItem := new(UserShow)
 		structure.Copy(item, showItem)
-		for _, roleID := range mUserRoles[item.ID].ToRoleIDs() {
-			if v, ok := mRoles[roleID]; ok {
-				showItem.Roles = append(showItem.Roles, v)
-			}
-		}
+		//for _, roleID := range mUserRoles[item.ID].ToRoleIDs() {
+		//	if v, ok := mRoles[roleID]; ok {
+		//		showItem.Roles = append(showItem.Roles, v)
+		//	}
+		//}
 		list[i] = showItem
 	}
 
@@ -181,14 +181,31 @@ func (a UserRoles) ToUserIDMap() map[uint64]UserRoles {
 
 // UserShow 用户显示项
 type UserShow struct {
-	ID        uint64    `json:"id,string"`  // 唯一标识
-	UserName  string    `json:"user_name"`  // 用户名
-	RealName  string    `json:"real_name"`  // 真实姓名
-	Phone     string    `json:"phone"`      // 手机号
-	Email     string    `json:"email"`      // 邮箱
-	Status    int       `json:"status"`     // 用户状态(1:启用 2:停用)
-	CreatedAt time.Time `json:"created_at"` // 创建时间
-	Roles     []*Role   `json:"roles"`      // 授权角色列表
+	//ID        uint64    `json:"id,string"`  // 唯一标识
+	//UserName  string    `json:"user_name"`  // 用户名
+	//RealName  string    `json:"real_name"`  // 真实姓名
+	//Phone     string    `json:"phone"`      // 手机号
+	//Email     string    `json:"email"`      // 邮箱
+	//Status    int       `json:"status"`     // 用户状态(1:启用 2:停用)
+	//CreatedAt time.Time `json:"created_at"` // 创建时间
+	//Roles     []*Role   `json:"roles"`      // 授权角色列表
+
+	ID             uint64    `json:"id"`               // 用户ID
+	Name           string    `json:"user_name"`        // 用户名
+	Scope          string    `json:"scope"`            // 用户的权限范围
+	CreatedAt      time.Time `json:"created_at"`       // 创建时间
+	UpdatedAt      time.Time `json:"updated_at"`       // 更新时间
+	ExpirationAt   time.Time `json:"expiration_at"`    // 过期时间
+	Status         int       `gorm:"index;default:0;"` // 状态(1:启用 2:停用)
+	Description    string    `json:"description"`      // 描述
+	AuthorizedKeys string    `json:"authorized_keys"`  // 授权密钥
+	OtpSeed        string    `json:"otp_seed"`         // OTP种子
+	Email          string    `json:"email"`            // 邮箱
+	Comment        string    `json:"comment"`          // 备注
+	LandingPage    string    `json:"landing_page"`     // 登录页面
+	Shell          string    `json:"shell"`            // Shell
+	Cert           string    `json:"cert"`             // 证书
+	ApiKeyId       string    `json:"api_key_id"`       // API密钥ID
 }
 
 // UserShows 用户显示项列表
@@ -197,5 +214,36 @@ type UserShows []*UserShow
 // UserShowQueryResult 用户显示项查询结果
 type UserShowQueryResult struct {
 	Data       UserShows
+	PageResult *PaginationResult
+}
+
+// ----------------------------------------UserApiKey--------------------------------------
+
+// UserApiKey 用户API密钥
+type UserApiKey struct {
+	ID       uint64 `json:"id"`         // 唯一标识
+	UserID   uint64 `json:"user_id"`    // 用户ID
+	ApiKeyID uint64 `json:"api_key_id"` // API密钥ID
+}
+
+// UserApiKeyQueryParam 查询条件
+type UserApiKeyQueryParam struct {
+	PaginationParam
+	UserID    uint64   // 用户ID
+	UserIDs   []uint64 // 用户ID列表
+	ApikeyID  uint64   // API密钥ID
+	ApikeyIDs []uint64 // API密钥ID列表
+}
+
+// UserApiKeyQueryOptions 查询可选参数项
+type UserApiKeyQueryOptions struct {
+	OrderFields []*OrderField // 排序字段
+}
+
+type UserApiKeys []*UserApiKey
+
+// UserApiKeyQueryResult 查询结果
+type UserApiKeyQueryResult struct {
+	Data       UserApiKeys
 	PageResult *PaginationResult
 }

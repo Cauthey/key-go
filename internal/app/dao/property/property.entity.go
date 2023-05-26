@@ -1,4 +1,4 @@
-package role
+package property
 
 import (
 	"context"
@@ -9,39 +9,36 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetRoleDB(ctx context.Context, defDB *gorm.DB) *gorm.DB {
-	return util.GetDBWithModel(ctx, defDB, new(Role))
+func GetPropertyDB(ctx context.Context, defDB *gorm.DB) *gorm.DB {
+	return util.GetDBWithModel(ctx, defDB, new(Property))
 }
 
-type SchemaRole schema.Role
+type SchemaProperty schema.Property
 
-func (a SchemaRole) ToRole() *Role {
-	item := new(Role)
+func (a SchemaProperty) ToProperty() *Property {
+	item := new(Property)
 	structure.Copy(a, item)
 	return item
 }
 
-type Role struct {
+type Property struct {
 	util.Model
-	Name     string  `gorm:"size:100;index;default:'';not null;"` // 角色名称
-	Sequence int     `gorm:"index;default:0;"`                    // 排序值
-	Memo     *string `gorm:"size:1024;"`                          // 备注
-	Status   int     `gorm:"index;default:0;"`                    // 状态(1:启用 2:禁用)
-	Creator  uint64  `gorm:""`                                    // 创建者
+	Name  string `gorm:"size:128;index;default:'';not null;"` // 配置名称
+	Value string `gorm:"size:256;default:'';"`                // 配置值
 }
 
-func (a Role) ToSchemaRole() *schema.Role {
-	item := new(schema.Role)
+func (a Property) ToSchemaProperty() *schema.Property {
+	item := new(schema.Property)
 	structure.Copy(a, item)
 	return item
 }
 
-type Roles []*Role
+type Properties []*Property
 
-func (a Roles) ToSchemaRoles() []*schema.Role {
-	list := make([]*schema.Role, len(a))
+func (a Properties) ToSchemaProperties() []*schema.Property {
+	list := make([]*schema.Property, len(a))
 	for i, item := range a {
-		list[i] = item.ToSchemaRole()
+		list[i] = item.ToSchemaProperty()
 	}
 	return list
 }

@@ -36,21 +36,22 @@ func (a *UserSrv) QueryShow(ctx context.Context, params schema.UserQueryParam, o
 		return nil, nil
 	}
 
-	userRoleResult, err := a.UserRoleRepo.Query(ctx, schema.UserRoleQueryParam{
-		UserIDs: result.Data.ToIDs(),
-	})
-	if err != nil {
-		return nil, err
-	}
+	//userRoleResult, err := a.UserRoleRepo.Query(ctx, schema.UserRoleQueryParam{
+	//	UserIDs: result.Data.ToIDs(),
+	//})
+	//if err != nil {
+	//	return nil, err
+	//}
 
-	roleResult, err := a.RoleRepo.Query(ctx, schema.RoleQueryParam{
-		IDs: userRoleResult.Data.ToRoleIDs(),
-	})
-	if err != nil {
-		return nil, err
-	}
+	//roleResult, err := a.RoleRepo.Query(ctx, schema.RoleQueryParam{
+	//	IDs: userRoleResult.Data.ToRoleIDs(),
+	//})
+	//if err != nil {
+	//	return nil, err
+	//}
 
-	return result.ToShowResult(userRoleResult.Data.ToUserIDMap(), roleResult.Data.ToMap()), nil
+	//return result.ToShowResult(userRoleResult.Data.ToUserIDMap(), roleResult.Data.ToMap()), nil
+	return result.ToShowResult(nil, nil), nil
 }
 
 func (a *UserSrv) Get(ctx context.Context, id uint64, opts ...schema.UserQueryOptions) (*schema.User, error) {
@@ -100,21 +101,21 @@ func (a *UserSrv) Create(ctx context.Context, item schema.User) (*schema.IDResul
 
 	item.Password = hash.SHA1String(item.Password)
 	item.ID = snowflake.MustID()
-	//err = a.TransRepo.Exec(ctx, func(ctx context.Context) error {
-	//	for _, urItem := range item.UserRoles {
-	//		urItem.ID = snowflake.MustID()
-	//		urItem.UserID = item.ID
-	//		err := a.UserRoleRepo.Create(ctx, *urItem)
-	//		if err != nil {
-	//			return err
-	//		}
-	//	}
-	//
-	//	return a.UserRepo.Create(ctx, item)
-	//})
-	//if err != nil {
-	//	return nil, err
-	//}
+	err = a.TransRepo.Exec(ctx, func(ctx context.Context) error {
+		//for _, urItem := range item.UserRoles {
+		//	urItem.ID = snowflake.MustID()
+		//	urItem.UserID = item.ID
+		//	err := a.UserRoleRepo.Create(ctx, *urItem)
+		//	if err != nil {
+		//		return err
+		//	}
+		//}
+
+		return a.UserRepo.Create(ctx, item)
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	//for _, urItem := range item.UserRoles {
 	//	a.Enforcer.AddRoleForUser(strconv.FormatUint(urItem.UserID, 10), strconv.FormatUint(urItem.RoleID, 10))
