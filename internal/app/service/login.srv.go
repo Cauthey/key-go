@@ -2,23 +2,24 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"key-go/internal/app/dao"
 	"key-go/internal/app/schema"
 	"key-go/pkg/auth"
 	"key-go/pkg/errors"
+	"key-go/pkg/util/hash"
 	"time"
 
 	"github.com/LyricTian/captcha"
 	"github.com/google/wire"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
 var LoginSet = wire.NewSet(wire.Struct(new(LoginSrv), "*"))
 
 type LoginSrv struct {
-	Auth auth.Auther
-	//UserRepo       *dao.UserRepo
+	Auth     auth.Auther
+	UserRepo *dao.UserRepo
 	//UserRoleRepo   *dao.UserRoleRepo
 	RoleRepo       *dao.RoleRepo
 	RoleMenuRepo   *dao.RoleMenuRepo
@@ -50,54 +51,44 @@ func (a *LoginSrv) ResCaptcha(ctx context.Context, w http.ResponseWriter, captch
 	return nil
 }
 
-//func (a *LoginSrv) Verify(ctx context.Context, userName, password string) (*schema.User, error) {
-//	root := schema.GetRootUser()
-//	if userName == root.UserName && root.Password == password {
-//		return root, nil
-//	}
-//
-//	result, err := a.UserRepo.Query(ctx, schema.UserQueryParam{
-//		UserName: userName,
-//	})
-//	if err != nil {
-//		return nil, err
-//	} else if len(result.Data) == 0 {
-//		return nil, errors.New400Response("not found user_name")
-//	}
-//
-//	item := result.Data[0]
-//	if item.Password != hash.SHA1String(password) {
-//		return nil, errors.New400Response("password incorrect")
-//	} else if item.Status != 1 {
-//		return nil, errors.ErrUserDisable
-//	}
-//
-//	return item, nil
-//}
+func (a *LoginSrv) Verify(ctx context.Context, userName, password string) (*schema.User, error) {
+	root := schema.GetRootUser()
+	fmt.Println("root:", root)
 
-// Verify 验证用户密码
-func (a *LoginSrv) Verify(password, passwordVerify string) error {
-	// 根据用户名获取到的user信息与输入密码 password 对比校验
-	if err := bcrypt.CompareHashAndPassword([]byte(passwordVerify), []byte(password)); err != nil {
-		return errors.New400Response("password incorrect")
+	if userName == root.Name && root.Password == hash.MD5String(password) {
+		return root, nil
+	} else if userName == root.Name && root.Password != hash.MD5String(password) {
+		return nil, errors.New400Response("password incorrect")
 	}
-	return nil
+
+	result, err := a.UserRepo.Query(ctx, schema.UserQueryParam{
+		Name: userName,
+	})
+	fmt.Println("result:err", result, err)
+	if err != nil {
+		return nil, err
+	} else if len(result.Data) == 0 {
+		return nil, errors.New400Response("not found user_name")
+	}
+
+	item := result.Data[0]
+	fmt.Println("item:", item)
+	if item.Password != hash.SHA1String(password) {
+		return nil, errors.New400Response("password incorrect")
+	} else if item.Status != 1 {
+		return nil, errors.ErrUserDisable
+	}
+
+	return item, nil
 }
 
 // VerifyUserValid 验证用户是否在有效期内
 func (a *LoginSrv) VerifyUserValid(user *schema.User) bool {
-	if user.Expires == "" {
+	if user.ExpirationAt.IsZero() {
 		return true
 	}
-	// 将用户有效期转换为时间
-	// 05/25/2023
-	timeStamp, err := time.Parse("01/02/2006", user.Expires)
-	if err != nil {
-		return false
-	}
-
 	// 比较当前时间与用户有效期时间
-	if time.Now().Before(timeStamp) {
+	if time.Now().Before(user.ExpirationAt) {
 		return true
 	}
 	return false
@@ -125,93 +116,76 @@ func (a *LoginSrv) DestroyToken(ctx context.Context, tokenString string) error {
 }
 
 func (a *LoginSrv) checkAndGetUser(ctx context.Context, userID uint64) (*schema.User, error) {
-	userList, err := GetUser()
+	user, err := a.UserRepo.Get(ctx, userID)
 	if err != nil {
 		return nil, err
+	} else if user == nil {
+		return nil, errors.ErrNotFound
+	} else if user.Status != 1 {
+		return nil, errors.ErrUserDisable
 	}
-	for _, v := range userList {
-		if v.UID == userID {
-			if !a.VerifyUserValid(&v) {
-				return nil, errors.ErrUserExpired
-			}
-			return &v, nil
-		}
-	}
-	return nil, errors.ErrNotFound
-}
-
-//func (a *LoginSrv) checkAndGetUser(ctx context.Context, userID uint64) (*schema.User, error) {
-//	user, err := a.UserRepo.Get(ctx, userID)
-//	if err != nil {
-//		return nil, err
-//	} else if user == nil {
-//		return nil, errors.ErrNotFound
-//	} else if user.Status != 1 {
-//		return nil, errors.ErrUserDisable
-//	}
-//	return user, nil
-//}
-
-func (a *LoginSrv) GetLoginInfo(ctx context.Context, userID uint64) (*schema.UserLoginInfo, error) {
-	userList, err := GetUser()
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range userList {
-		if v.UID == userID {
-			info := &schema.UserLoginInfo{
-				UserID:      v.UID,
-				UserName:    v.Name,
-				UserGroup:   v.GroupName,
-				Description: v.Description,
-			}
-			return info, nil
-		}
-	}
-	return nil, errors.ErrNotFound
+	return user, nil
 }
 
 //func (a *LoginSrv) GetLoginInfo(ctx context.Context, userID uint64) (*schema.UserLoginInfo, error) {
-//	if isRoot := schema.CheckIsRootUser(ctx, userID); isRoot {
-//		root := schema.GetRootUser()
-//		loginInfo := &schema.UserLoginInfo{
-//			UserName: root.UserName,
-//			RealName: root.RealName,
-//		}
-//		return loginInfo, nil
-//	}
-//
-//	user, err := a.checkAndGetUser(ctx, userID)
+//	userList, err := GetUser()
 //	if err != nil {
 //		return nil, err
 //	}
-//
-//	info := &schema.UserLoginInfo{
-//		UserID:   user.ID,
-//		UserName: user.UserName,
-//		RealName: user.RealName,
-//	}
-//
-//	userRoleResult, err := a.UserRoleRepo.Query(ctx, schema.UserRoleQueryParam{
-//		UserID: userID,
-//	})
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	if roleIDs := userRoleResult.Data.ToRoleIDs(); len(roleIDs) > 0 {
-//		roleResult, err := a.RoleRepo.Query(ctx, schema.RoleQueryParam{
-//			IDs:    roleIDs,
-//			Status: 1,
-//		})
-//		if err != nil {
-//			return nil, err
+//	for _, v := range userList {
+//		if v.UID == userID {
+//			info := &schema.UserLoginInfo{
+//				UserID:      v.UID,
+//				UserName:    v.Name,
+//				UserGroup:   v.GroupName,
+//				Description: v.Description,
+//			}
+//			return info, nil
 //		}
-//		info.Roles = roleResult.Data
 //	}
-//
-//	return info, nil
+//	return nil, errors.ErrNotFound
 //}
+
+func (a *LoginSrv) GetLoginInfo(ctx context.Context, userID uint64) (*schema.UserLoginInfo, error) {
+	if isRoot := schema.CheckIsRootUser(ctx, userID); isRoot {
+		root := schema.GetRootUser()
+		loginInfo := &schema.UserLoginInfo{
+			UserName: root.Name,
+		}
+		return loginInfo, nil
+	}
+
+	user, err := a.checkAndGetUser(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	info := &schema.UserLoginInfo{
+		UserID:      user.ID,
+		UserName:    user.Name,
+		Description: user.Description,
+	}
+
+	//userRoleResult, err := a.UserRoleRepo.Query(ctx, schema.UserRoleQueryParam{
+	//	UserID: userID,
+	//})
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	//if roleIDs := userRoleResult.Data.ToRoleIDs(); len(roleIDs) > 0 {
+	//	roleResult, err := a.RoleRepo.Query(ctx, schema.RoleQueryParam{
+	//		IDs:    roleIDs,
+	//		Status: 1,
+	//	})
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	info.Roles = roleResult.Data
+	//}
+
+	return info, nil
+}
 
 //func (a *LoginSrv) QueryUserMenuTree(ctx context.Context, userID uint64) (schema.MenuTrees, error) {
 //	isRoot := schema.CheckIsRootUser(ctx, userID)

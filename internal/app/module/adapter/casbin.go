@@ -20,7 +20,7 @@ type CasbinAdapter struct {
 	RoleRepo         *dao.RoleRepo
 	RoleMenuRepo     *dao.RoleMenuRepo
 	MenuResourceRepo *dao.MenuActionResourceRepo
-	//UserRepo         *dao.UserRepo
+	UserRepo         *dao.UserRepo
 	//UserRoleRepo     *dao.UserRoleRepo
 }
 

@@ -15,11 +15,11 @@ import (
 var RoleSet = wire.NewSet(wire.Struct(new(RoleSrv), "*"))
 
 type RoleSrv struct {
-	Enforcer     *casbin.SyncedEnforcer
-	TransRepo    *dao.TransRepo
-	RoleRepo     *dao.RoleRepo
-	RoleMenuRepo *dao.RoleMenuRepo
-	//UserRepo               *dao.UserRepo
+	Enforcer               *casbin.SyncedEnforcer
+	TransRepo              *dao.TransRepo
+	RoleRepo               *dao.RoleRepo
+	RoleMenuRepo           *dao.RoleMenuRepo
+	UserRepo               *dao.UserRepo
 	MenuActionResourceRepo *dao.MenuActionResourceRepo
 }
 

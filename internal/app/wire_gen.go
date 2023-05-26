@@ -10,6 +10,8 @@ import (
 	"key-go/internal/app/api"
 	"key-go/internal/app/dao/menu"
 	"key-go/internal/app/dao/role"
+	"key-go/internal/app/dao/user"
+
 	//"key-go/internal/app/dao/user"
 	"key-go/internal/app/dao/util"
 	"key-go/internal/app/module/adapter"
@@ -38,9 +40,9 @@ func BuildInjector() (*Injector, func(), error) {
 	menuActionResourceRepo := &menu.MenuActionResourceRepo{
 		DB: db,
 	}
-	//userRepo := &user.UserRepo{
-	//	DB: db,
-	//}
+	userRepo := &user.UserRepo{
+		DB: db,
+	}
 	//userRoleRepo := &user.UserRoleRepo{
 	//	DB: db,
 	//}
@@ -48,7 +50,7 @@ func BuildInjector() (*Injector, func(), error) {
 		RoleRepo:         roleRepo,
 		RoleMenuRepo:     roleMenuRepo,
 		MenuResourceRepo: menuActionResourceRepo,
-		//UserRepo:         userRepo,
+		UserRepo:         userRepo,
 		//UserRoleRepo:     userRoleRepo,
 	}
 	syncedEnforcer, cleanup3, err := InitCasbin(casbinAdapter)
@@ -64,8 +66,8 @@ func BuildInjector() (*Injector, func(), error) {
 		DB: db,
 	}
 	loginSrv := &service.LoginSrv{
-		Auth: auther,
-		//UserRepo:       userRepo,
+		Auth:     auther,
+		UserRepo: userRepo,
 		//UserRoleRepo:   userRoleRepo,
 		RoleRepo:       roleRepo,
 		RoleMenuRepo:   roleMenuRepo,
@@ -88,20 +90,20 @@ func BuildInjector() (*Injector, func(), error) {
 		MenuSrv: menuSrv,
 	}
 	roleSrv := &service.RoleSrv{
-		Enforcer:     syncedEnforcer,
-		TransRepo:    trans,
-		RoleRepo:     roleRepo,
-		RoleMenuRepo: roleMenuRepo,
-		//UserRepo:               userRepo,
+		Enforcer:               syncedEnforcer,
+		TransRepo:              trans,
+		RoleRepo:               roleRepo,
+		RoleMenuRepo:           roleMenuRepo,
+		UserRepo:               userRepo,
 		MenuActionResourceRepo: menuActionResourceRepo,
 	}
 	roleAPI := &api.RoleAPI{
 		RoleSrv: roleSrv,
 	}
 	userSrv := &service.UserSrv{
-		//Enforcer:     syncedEnforcer,
-		//TransRepo:    trans,
-		//UserRepo:     userRepo,
+		Enforcer:  syncedEnforcer,
+		TransRepo: trans,
+		UserRepo:  userRepo,
 		//UserRoleRepo: userRoleRepo,
 		//RoleRepo:     roleRepo,
 	}

@@ -88,6 +88,17 @@ Addr = "127.0.0.1:16060"
 # 配置文件目录(为空则使用默认目录)
 ConfigDir = ""
 
+
+[Root]
+# 用户ID
+UserID = 0
+# 登录用户名
+UserName = "root"
+# 登录密码
+Password = "trunkey7771502"
+# 显示名称
+#RealName = "admin"
+
 # redis配置信息
 [Redis]
 # 地址

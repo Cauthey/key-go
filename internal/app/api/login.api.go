@@ -64,29 +64,24 @@ func (a *LoginAPI) Login(c *gin.Context) {
 	//	ginx.ResError(c, errors.New400Response("无效的验证码"))
 	//	return
 	//}
-
-	// 验证用户是否存在/获取用户
-	ok, user := service.GetUserByUsername(item.UserName)
-	if !ok {
-		ginx.ResError(c, errors.New400Response("not found user_name"))
-		return
-	}
-
-	// 验证用户登录密码
-	err := a.LoginSrv.Verify(item.Password, user.Password)
+	fmt.Println("item:", item)
+	// 验证用户密码
+	user, err := a.LoginSrv.Verify(ctx, item.UserName, item.Password)
 	if err != nil {
-		logger.AuditLog(fmt.Sprintf("user [%s] login failed, user or password incorrect ", user.Name))
+		logger.AuditLog(err.Error())
 		ginx.ResError(c, err)
 		return
 	}
+	fmt.Println("user:", user)
+
 	// 验证用户是否在有效期内
-	ok = a.LoginSrv.VerifyUserValid(user)
+	ok := a.LoginSrv.VerifyUserValid(user)
 	if !ok {
 		logger.AuditLog(fmt.Sprintf("user [%s] login failed, expired ", user.Name))
 		ginx.ResError(c, err)
 		return
 	}
-	tokenInfo, err := a.LoginSrv.GenerateToken(ctx, a.formatTokenUserID(user.UID, user.Name))
+	tokenInfo, err := a.LoginSrv.GenerateToken(ctx, a.formatTokenUserID(user.ID, user.Name))
 	if err != nil {
 		ginx.ResError(c, err)
 		return
