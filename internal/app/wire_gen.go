@@ -8,7 +8,9 @@ package app
 
 import (
 	"key-go/internal/app/api"
+	"key-go/internal/app/dao/apikey"
 	"key-go/internal/app/dao/menu"
+	"key-go/internal/app/dao/property"
 	"key-go/internal/app/dao/role"
 	"key-go/internal/app/dao/user"
 
@@ -43,6 +45,18 @@ func BuildInjector() (*Injector, func(), error) {
 	userRepo := &user.UserRepo{
 		DB: db,
 	}
+	groupRepo := &user.GroupRepo{
+		DB: db,
+	}
+	userApiKeyRepo := &user.UserApiKeyRepo{
+		DB: db,
+	}
+	apiKeyRepo := &apikey.ApiKeyRepo{
+		DB: db,
+	}
+	propertyRepo := &property.PropertyRepo{
+		DB: db,
+	}
 	//userRoleRepo := &user.UserRoleRepo{
 	//	DB: db,
 	//}
@@ -52,6 +66,10 @@ func BuildInjector() (*Injector, func(), error) {
 		MenuResourceRepo: menuActionResourceRepo,
 		UserRepo:         userRepo,
 		//UserRoleRepo:     userRoleRepo,
+		GroupRepo:      groupRepo,
+		UserApiKeyRepo: userApiKeyRepo,
+		ApiKeyRepo:     apiKeyRepo,
+		PropertyRepo:   propertyRepo,
 	}
 	syncedEnforcer, cleanup3, err := InitCasbin(casbinAdapter)
 	if err != nil {
@@ -118,12 +136,17 @@ func BuildInjector() (*Injector, func(), error) {
 		RoleAPI:        roleAPI,
 		UserAPI:        userAPI,
 	}
+	propertySrv := &service.PropertySrv{
+		PropertyRepo: propertyRepo,
+	}
 	engine := InitGinEngine(routerRouter)
 	injector := &Injector{
 		Engine:         engine,
 		Auth:           auther,
 		CasbinEnforcer: syncedEnforcer,
 		MenuSrv:        menuSrv,
+		UserSrv:        userSrv,
+		PropertySrv:    propertySrv,
 	}
 	return injector, func() {
 		cleanup3()

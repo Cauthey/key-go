@@ -60,7 +60,7 @@ func (a *GroupRepo) Query(ctx context.Context, params schema.GroupQueryParam, op
 
 }
 
-func (a *GroupRepo) Get(ctx context.Context, id uint64) (*schema.Group, error) {
+func (a *GroupRepo) Get(ctx context.Context, id uint64, opts ...schema.GroupQueryOptions) (*schema.Group, error) {
 	var item Group
 	ok, err := util.FindOne(ctx, GetGroupDB(ctx, a.DB).Where("id=?", id), &item)
 	if err != nil {

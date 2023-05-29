@@ -29,6 +29,7 @@ func CheckIsRootUser(ctx context.Context, userID uint64) bool {
 // User 用户对象
 type User struct {
 	ID             uint64    `json:"id"`               // 用户ID
+	GID            uint64    `json:"gid"`              // 组ID
 	Name           string    `json:"user_name"`        // 用户名
 	Password       string    `json:"password"`         // 密码
 	Scope          string    `json:"scope"`            // 用户的权限范围
@@ -175,15 +176,6 @@ func (a UserRoles) ToUserIDMap() map[uint64]UserRoles {
 
 // UserShow 用户显示项
 type UserShow struct {
-	//ID        uint64    `json:"id,string"`  // 唯一标识
-	//UserName  string    `json:"user_name"`  // 用户名
-	//RealName  string    `json:"real_name"`  // 真实姓名
-	//Phone     string    `json:"phone"`      // 手机号
-	//Email     string    `json:"email"`      // 邮箱
-	//Status    int       `json:"status"`     // 用户状态(1:启用 2:停用)
-	//CreatedAt time.Time `json:"created_at"` // 创建时间
-	//Roles     []*Role   `json:"roles"`      // 授权角色列表
-
 	ID             uint64    `json:"id"`               // 用户ID
 	Name           string    `json:"user_name"`        // 用户名
 	Scope          string    `json:"scope"`            // 用户的权限范围

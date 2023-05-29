@@ -21,7 +21,11 @@ type CasbinAdapter struct {
 	RoleMenuRepo     *dao.RoleMenuRepo
 	MenuResourceRepo *dao.MenuActionResourceRepo
 	UserRepo         *dao.UserRepo
-	//UserRoleRepo     *dao.UserRoleRepo
+	UserRoleRepo     *dao.UserRoleRepo
+	GroupRepo        *dao.GroupRepo
+	UserApiKeyRepo   *dao.UserApiKeyRepo
+	ApiKeyRepo       *dao.ApiKeyRepo
+	PropertyRepo     *dao.PropertyRepo
 }
 
 // Loads all policy rules from the storage.

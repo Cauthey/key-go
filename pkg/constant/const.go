@@ -39,3 +39,33 @@ const (
 const (
 	SystemConfigXmlPath = "/conf/config.xml"
 )
+
+// 系统配置属性
+
+var SystemConfigPropertiesInitData = map[string]string{
+	"system.optimization":                  "normal",
+	"system.hostname":                      "TAF 1.0",
+	"system.domain":                        "localdomain",
+	"system.dnsallowoverride":              "1",
+	"system.nextuid":                       "2000",
+	"system.nextgid":                       "2000",
+	"system.timezone":                      "Etc/UTC",
+	"system.timeservers":                   "ntp1.aliyun.com,ntp2.aliyun.com,ntp3.aliyun.com",
+	"system.disablenatreflection":          "yes",
+	"system.usevirtualterminal":            "1",
+	"system.disableconsolemenu":            "",
+	"system.disablevlanhwfilter":           "1",
+	"system.disablechecksumoffloading":     "1",
+	"system.disablesegmentationoffloading": "1",
+	"system.disablelargereceiveoffloading": "1",
+	"system.ipv6allow":                     "",
+	"system.powerd_ac_mode":                "hadp",
+	"system.powerd_battery_mode":           "hadp",
+	"system.powerd_normal_mode":            "hadp",
+	"system.bogons.interval":               "monthly",
+	"system.pf_share_forward":              "1",
+	"system.lb_use_sticky":                 "1",
+	"system.ssh.group":                     "1",
+	"system.rrdbackup":                     "-1",
+	"system.netflowbackup":                 "-1",
+}

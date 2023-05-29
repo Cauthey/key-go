@@ -42,6 +42,7 @@ type (
 	UserRepo               = user.UserRepo
 	PropertyRepo           = property.PropertyRepo
 	UserApiKeyRepo         = user.UserApiKeyRepo
+	GroupRepo              = user.GroupRepo
 	ApiKeyRepo             = apikey.ApiKeyRepo
 ) // end
 
@@ -61,6 +62,7 @@ func AutoMigrate(db *gorm.DB) error {
 		new(user.User),
 		new(property.Property),
 		new(user.UserApiKey),
+		new(user.Group),
 		new(apikey.ApiKey),
 	) // end
 }

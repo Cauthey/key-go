@@ -99,6 +99,11 @@ func Init(ctx context.Context, opts ...Option) (func(), error) {
 		}
 	}
 
+	err = injector.PropertySrv.InitData(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	httpServerCleanFunc := InitHTTPServer(ctx, injector.Engine)
 
 	return func() {

@@ -5,6 +5,7 @@ import (
 	"key-go/internal/app/dao/util"
 	"key-go/internal/app/schema"
 	"key-go/pkg/errors"
+	"key-go/pkg/util/snowflake"
 
 	"github.com/google/wire"
 	"gorm.io/gorm"
@@ -84,17 +85,24 @@ func (a *PropertyRepo) Get(ctx context.Context, name string, opts ...schema.Prop
 	return item.ToSchemaProperty(), nil
 }
 
+func (a *PropertyRepo) Count(ctx context.Context) (int64, error) {
+	var count int64
+	err := GetPropertyDB(ctx, a.DB).Model(&Property{}).Count(&count).Error
+	return count, err
+}
+
 func (a *PropertyRepo) Create(ctx context.Context, item schema.Property) error {
 	eitem := SchemaProperty(item).ToProperty()
 	result := GetPropertyDB(ctx, a.DB).Create(eitem)
 	return errors.WithStack(result.Error)
 }
 
-func (a *PropertyRepo) CreateByMap(ctx context.Context, m map[string]interface{}) (err error) {
+func (a *PropertyRepo) CreateByMap(ctx context.Context, m map[string]string) (err error) {
 	var o Property
 	for k, v := range m {
+		o.ID = snowflake.MustID()
 		o.Name = k
-		o.Value = v.(string)
+		o.Value = v
 		if err = GetPropertyDB(ctx, a.DB).Create(&o).Error; err != nil {
 			return
 		}

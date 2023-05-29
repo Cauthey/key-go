@@ -6,6 +6,7 @@ import (
 	"key-go/internal/app/dao"
 	"key-go/internal/app/schema"
 	"key-go/pkg/auth"
+	"key-go/pkg/constant"
 	"key-go/pkg/errors"
 )
 
@@ -36,11 +37,19 @@ func (a *PropertySrv) Get(ctx context.Context, name string, opts ...schema.Prope
 	return item, nil
 }
 
+func (a *PropertySrv) Count(ctx context.Context) (int64, error) {
+	return a.PropertyRepo.Count(ctx)
+}
+
 func (a *PropertySrv) Create(ctx context.Context, item schema.Property) error {
 	if err := a.checkName(ctx, item); err != nil {
 		return err
 	}
 	return a.PropertyRepo.Create(ctx, item)
+}
+
+func (a *PropertySrv) CreateByMap(ctx context.Context, item map[string]string) error {
+	return a.PropertyRepo.CreateByMap(ctx, item)
 }
 
 func (a *PropertySrv) Update(ctx context.Context, name string, item schema.Property) error {
@@ -64,4 +73,15 @@ func (a *PropertySrv) checkName(ctx context.Context, item schema.Property) error
 		return errors.New400Response("configuration's property has been exists")
 	}
 	return nil
+}
+
+func (a *PropertySrv) InitData(ctx context.Context) error {
+	count, err := a.Count(ctx)
+	if err != nil {
+		return err
+	}
+	if count != 0 {
+		return nil
+	}
+	return a.CreateByMap(ctx, constant.SystemConfigPropertiesInitData)
 }
