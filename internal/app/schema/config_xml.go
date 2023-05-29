@@ -6,9 +6,9 @@ type TAF struct {
 	System System `json:"system"`
 }
 
-type Sysctl struct {
-	//Item    []Item  `json:"item"`
-}
+//type Sysctl struct {
+//	//Item    []Item  `json:"item"`
+//}
 
 type System struct {
 	Optimization                  string  `json:"optimization"`

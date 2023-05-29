@@ -24,8 +24,9 @@ var RepoSet = wire.NewSet(
 	role.RoleSet,
 	user.UserRoleSet,
 	user.UserSet,
-	property.PropertySet,
 	user.UserApiKeySet,
+	user.GroupSet,
+	property.PropertySet,
 	apikey.ApiKeySet,
 ) // end
 

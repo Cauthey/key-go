@@ -47,12 +47,6 @@ type User struct {
 	ApiKeyId       string    `json:"api_key_id"`       // API密钥ID
 }
 
-type Apikey struct {
-	ID     uint64 `json:"id,string"` // API密钥ID
-	Key    string `json:"key"`       // API密钥
-	Secret string `json:"secret"`    // API密钥密钥
-}
-
 func (a *User) String() string {
 	return json.MarshalToString(a)
 }

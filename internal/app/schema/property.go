@@ -13,7 +13,6 @@ type PropertyQueryParam struct {
 	PaginationParam
 	Name       string `form:"name"`       // 用户名
 	QueryValue string `form:"queryValue"` // 模糊查询
-	Status     int    `form:"status"`     // 用户状态(1:启用 2:停用)
 }
 
 // PropertyQueryOptions 查询可选参数项

@@ -30,14 +30,14 @@ func (a *UserRepo) Query(ctx context.Context, params schema.UserQueryParam, opts
 
 	db := GetUserDB(ctx, a.DB)
 	if v := params.Name; v != "" {
-		db = db.Where("user_name=?", v)
+		db = db.Where("name=?", v)
 	}
 	if v := params.Status; v > 0 {
 		db = db.Where("status=?", v)
 	}
 	if v := params.QueryValue; v != "" {
 		v = "%" + v + "%"
-		db = db.Where("user_name LIKE ? OR real_name LIKE ?", v, v)
+		db = db.Where("name LIKE ? OR description LIKE ? OR email LIKE ? OR scope LIKE ? OR comment LIKE ?", v, v, v, v, v)
 	}
 
 	if len(opt.SelectFields) > 0 {
