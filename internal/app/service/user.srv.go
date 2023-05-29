@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"runtime"
 	"strconv"
 
 	"github.com/casbin/casbin/v2"
@@ -263,5 +264,23 @@ func (a *UserSrv) UpdateStatus(ctx context.Context, id uint64, status int) error
 	//	a.Enforcer.DeleteUser(strconv.FormatUint(id, 10))
 	//}
 
+	return nil
+}
+
+// ---------------- 对系统用户的操作 ----------------
+
+func (a *UserSrv) SysUserAdd(item schema.User) error {
+	if item.Password != "" {
+		item.Password = hash.SHA1String(item.Password)
+	}
+	var systemType = runtime.GOOS
+	switch systemType {
+	case "freebsd\n":
+		{
+
+		}
+	default:
+		return errors.New400Response("system type is not supported")
+	}
 	return nil
 }

@@ -100,12 +100,12 @@ func (a *Router) RegisterAPI(app *gin.Engine) {
 		gUser := v1.Group("users")
 		{
 			gUser.GET("", a.UserAPI.Query)
-			gUser.GET(":id", a.UserAPI.Get)
+			gUser.GET("/:id", a.UserAPI.Get)
 			gUser.POST("", a.UserAPI.Create)
-			gUser.PUT(":id", a.UserAPI.Update)
-			gUser.DELETE(":id", a.UserAPI.Delete)
-			gUser.PATCH(":id/enable", a.UserAPI.Enable)
-			gUser.PATCH(":id/disable", a.UserAPI.Disable)
+			gUser.PUT("/:id", a.UserAPI.Update)
+			gUser.DELETE("/:id", a.UserAPI.Delete)
+			gUser.PATCH("/:id/enable", a.UserAPI.Enable)
+			gUser.PATCH("/:id/disable", a.UserAPI.Disable)
 		}
 	} // v1 end
 }

@@ -2,13 +2,12 @@ package property
 
 import (
 	"context"
+	"github.com/google/wire"
+	"gorm.io/gorm"
 	"key-go/internal/app/dao/util"
 	"key-go/internal/app/schema"
 	"key-go/pkg/errors"
 	"key-go/pkg/util/snowflake"
-
-	"github.com/google/wire"
-	"gorm.io/gorm"
 )
 
 var PropertySet = wire.NewSet(wire.Struct(new(PropertyRepo), "*"))
@@ -100,7 +99,7 @@ func (a *PropertyRepo) Create(ctx context.Context, item schema.Property) error {
 func (a *PropertyRepo) CreateByMap(ctx context.Context, m map[string]string) (err error) {
 	var o Property
 	for k, v := range m {
-		o.ID = snowflake.MustID()
+		o.Model.ID = snowflake.MustID()
 		o.Name = k
 		o.Value = v
 		if err = GetPropertyDB(ctx, a.DB).Create(&o).Error; err != nil {

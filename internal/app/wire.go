@@ -8,9 +8,9 @@ package app
 import (
 	"github.com/google/wire"
 
-	"key-go/app/module/adapter"
 	"key-go/internal/app/api"
 	"key-go/internal/app/dao"
+	"key-go/internal/app/module/adapter"
 	"key-go/internal/app/router"
 	"key-go/internal/app/service"
 )

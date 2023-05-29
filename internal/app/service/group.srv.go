@@ -10,7 +10,7 @@ import (
 	"key-go/pkg/util/snowflake"
 )
 
-var GroupSet = wire.NewSet(wire.Struct(new(UserSrv), "*"))
+var GroupSet = wire.NewSet(wire.Struct(new(GroupSrv), "*"))
 
 type GroupSrv struct {
 	Enforcer     *casbin.SyncedEnforcer
